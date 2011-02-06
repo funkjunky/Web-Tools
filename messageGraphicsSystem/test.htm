@@ -1,0 +1,37 @@
+<html>
+<head>
+ <title>testing messages systems</title>
+ <script type="text/javascript" src="jquery.min.js"></script>
+ <script type="text/javascript" src="notification.js"></script>
+ <script type="text/javascript" src="dialog.js"></script>
+ <script type="text/javascript" src="dialogsystem.js"></script>
+ <script type="text/javascript" src="notificationdialogsystem.js"></script>
+ <script type="text/javascript" src="extrafncs.js"></script>
+ <script type="text/javascript">
+ $(function(){
+	/*var ds = new DialogSystem();
+	ds.displayMessage("hello world!");
+	ds.displayMessage("foo!");
+	ds.displayMessage("bar!");
+*/
+	var ns = new NotificationConsole();
+	ns.addNotification(new Notification(NOTE_SYS_ERROR, "ZOMG!"));
+	ns.addNotification(new Notification(NOTE_SYS_NOTIFY, "less omg"));
+	ns.addNotification(new Notification(NOTE_USR_WARNING, "I'm warning you mr. user"));
+
+	var nds = new NotificationDialogSystem();
+	nds.addNotification(new Notification(NOTE_SYS_NOTIFY, "First!"));
+	nds.addNotification(new Notification(NOTE_SYS_ERROR, "ZOMG!"));
+	nds.addNotification(new Notification(NOTE_SYS_NOTIFY, "less omg"));
+	nds.addNotification(new Notification(NOTE_USR_WARNING, "I'm warning you mr. user"));
+	nds.setConsoleCSS({position: "fixed", top: "50%", left: "50%"});
+
+	document.body.appendChild(ns.getContainer());
+	document.body.appendChild(nds.getConsole());
+ });
+ </script>
+</head>
+<body>
+ Hello I'm a webpage!
+</body>
+</html>
