@@ -1,0 +1,18 @@
+<html>
+<head>
+<title>testing timePicker.js</title>
+<script type="text/javascript" src="../jquery.min.js"></script>
+<script type="text/javascript" src="jquery.timepicker.js"></script>
+<script type="text/javascript" src="getTimeArray.js"></script>
+<!-- scripts for messageGraphicsSystem -->
+<script type="text/javascript" src="../messageGraphicsSystem.js"></script>
+<script type="text/javascript">
+	$(function() {
+		$(".timepicker").timepicker({userErrorCallback: UserWarning});
+	});
+</script>
+</head>
+<body>
+ <input type="text" class="timepicker" />
+</body>
+</html>
