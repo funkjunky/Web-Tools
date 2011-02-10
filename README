@@ -1,0 +1,5 @@
+This directory is meant for housing any JS or PHP tools I develop on any project. I develop a lot of them, and I tend to lose track of them. If I keep them here, not only can I always find them and they will be versioned, but further they will be online for anyone to use!
+
+Currently The tools I have are:
+-Notification Dialog system
+-Time Picker (jQuery Plugin) [mimics Google Calendars]
