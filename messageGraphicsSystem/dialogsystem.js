@@ -18,10 +18,9 @@ function DialogSystem(settings)
 
 		this.setDefaults();
 
-		if(count(settings))
-			this.setParams(params);
-
 		this.setupContainingDiv();
+
+		this.setParams(settings);
 	};
 	this.setDefaults = function()
 	{
@@ -37,12 +36,18 @@ function DialogSystem(settings)
 		this.cloggedTimeDisplayed = 500;
 		this.displaySync = false;
 	};
+  this.setParams = function(params)
+  {
+    for(i in params)
+      this[i] = params[i];
+
+		$(this._containingDiv).css(this._css);
+  };
 
 	this.setupContainingDiv = function()
 	{
-		this._containingDiv = document.createElement("div");
-		$(this._containingDiv).css(this._css);
-		document.body.appendChild(this._containingDiv);
+		this._containingDiv = $("<div />").get()[0];
+		$(document.body).append(this._containingDiv);
 	};
 
 	this.displayMessage = function(dialog)

@@ -47,9 +47,9 @@ function Dialog(params)
 
 		this.getDOM = function()
 		{
-			var div = document.createElement("div");
+			var div = $("<div />").get()[0];
 			$(div).css(this.css);
-			var close = document.createElement("span");
+			var close = $("<div />").get()[0];
 			$(close).css({cursor: "pointer", marginRight: "0px", display: "block", textAlign: "right"});
 			$(close).click(function(){
 				//simply hide the div.
@@ -57,9 +57,9 @@ function Dialog(params)
 				//but then also remove it, lol.
 				$(div).remove();
 			});
-			close.appendChild(document.createTextNode("X"));
-			div.appendChild(close);
-			div.appendChild(document.createTextNode(this.message));
+			$(close).append("X");
+			$(div).append(close);
+			$(div).append(this.message);
 			
 			var header ="nothing yet... I'll add this later...";
 

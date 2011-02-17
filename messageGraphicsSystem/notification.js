@@ -31,21 +31,38 @@ function NotificationConsole(params)
 {
 	this.notifications = 0;
 	this._notificationDOMS = 0;
+  this.notificationCSS = 0;
+  this.containerCSS = 0;
 
 	this._containingDiv = 0;
 
 	this.constructor = function(params)
 	{
 		this.setDefaults();
+
+    this.setParams(params);
 	};
 
 	this.setDefaults = function()
 	{
-		this._containingDiv = document.createElement("div");
+		this._containingDiv = $("<div />").get()[0];
+    	$(this._containingDiv).hide(); //TODO: This is a hack. I'm not sure why it 
+                                //shows up automatically...
 
 		this.notifications = [];
 		this._notificationDOMS = [];
-	}
+
+    this.containerCSS = {};
+    this.notificationCSS = {};
+	};
+
+  this.setParams = function(params)
+  {
+    for(i in params)
+      this[i] = params[i];
+
+    $(this._containingDiv).css(this.containerCSS);
+  };
 
 	this.getContainer = function()
 	{
@@ -63,11 +80,11 @@ function NotificationConsole(params)
 
 	this._addNotificationGraphics = function(notification)
 	{
-			var p = document.createElement("p");
+			var p = $("<p />").get()[0];
 			$(p).css({marginTop: "0px", marginBottom: "0px"});
-			p.appendChild(document.createTextNode(notification.message));
+      $(p).css(this.notificationCSS);
+			$(p).append(notification.message);
 			p.title = noteToString(notification.type) + ":\n" + notification.message;
-			p.className = "hoverHighlight";
 			var defaultBGColor = "rgb(255, 255, 255)";
 			$(p).css("backgroundColor", defaultBGColor);
 			$(p).hover(function(){ 
@@ -77,7 +94,7 @@ function NotificationConsole(params)
 					$(this).css("backgroundColor", "white");
 			});
 			this._notificationDOMS.push(p);
-			this._containingDiv.appendChild(p);
+			$(this._containingDiv).append(p);
 	};
 
 	this.removeNotification = function(key)
