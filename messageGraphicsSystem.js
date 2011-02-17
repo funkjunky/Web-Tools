@@ -29,7 +29,18 @@ function intersect(obj1,obj2)
 {var newobj={};for(i in obj1)
 newobj[i]=obj1[i];for(i in obj2)
 newobj[i]=obj2[i]
-return newobj;}/*!
+return newobj;}var NDS=0;$(function(){NDS=new NotificationDialogSystem();$(document.body).append(NDS.getConsole());$("img").error(function(){Warning("An Image failed to load.");});});function Error(message)
+{NDS.addNotification(new Notification(NOTE_SYS_ERROR,message));}
+function Warning(message)
+{NDS.addNotification(new Notification(NOTE_SYS_WARNING,message));}
+function Notify(message)
+{NDS.addNotification(new Notification(NOTE_SYS_NOTIFY,message));}
+function UserError(message)
+{NDS.addNotification(new Notification(NOTE_USR_ERROR,message));}
+function UserWarning(message)
+{NDS.addNotification(new Notification(NOTE_USR_WARNING,message));}
+function UserNotify(message)
+{NDS.addNotification(new Notification(NOTE_USR_NOTIFY,message));}/*!
  * jQuery JavaScript Library v1.4.4
  * http://jquery.com/
  *
