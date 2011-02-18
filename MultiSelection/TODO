@@ -1,0 +1,89 @@
+TODO:
+
+[auto-complete]
+-create a function that takes an array/associative array, and a string, and
+ returns a new array with only the elements the contain the string.
+-update the function to have an option "loose" that uses the regex I created
+	-[hjk].?[as].?[asd].?[iop].?[bnm] for jason.
+ on my desktop.
+-create a jquery function extension that takes an array, css, and callback. The callback takes a parameter which would be the value of the item selected. The css is for position and sizing the container. (like autocomplete anywhere with any text.)
+	-make the div and have it use the css and show up with the divs from the 
+	array. If associative then put the key in the name attribute and the 
+	value as the text, otherwise use the value for both the name and the text
+	-have the callback be triggered with the div that was clicked's name 
+	passed as the parameter.
+-Have the auto-complete work for when the input is typed in.
+	-First tie it together in the most basic way, not including commas.
+	-Take the caret position and find the first comma after it, and the first
+	comma before it. Trim the whitespace before and after, and use this text.
+-Whenever a checkbox is checked or unchecked, update the list for autocomplete. This way the user can't put in duplicate items, and it allows them to search for what they need faster with less items to choose from.
+
+DONE:
+[checkboxes]
+-create the plugin that if the option is set, creates a button to show a div
+ with checkboxes for the assoc array given.
+	-create the jquery plugin code base.
+	-have the text input show up with a button beside it if the option is set
+	-have a div pop up when the button is clicked, with checkboxes.
+	-have the checkboxes has the proper "value" attributes.
+-Have the checkboxes update the input text.
+	-for the onclick of the checkboxes have the text be
+	added to the input box.
+	-for the onclick of the checkbox for deselection, have the input box be 
+	searched for the text from the checkbox, then removed.
+
+-Have the input text update the checkboxes.
+	-add an onchange event for the text input
+		-explode the string by comma and trim whitespace afterwards from the 
+		beginning and end of each peice.
+		-clear all checkboxes.
+		-check each item against the array
+			-if it doesn't match perfectly then
+			call the error callback with text stating what number entry failed,
+			and the text that failed.
+				-also add a listener to the associated form's onsubmit that 
+				stops the submission and calls the errorCallback with a message 
+				that the particular input is incorrect. Keep track of this 
+				listener...
+			-if it does match, then check the associated checkbox.
+				-also take the whitespace trimmed item and append it back to 
+				the input. This way we get a nice clean trimmed input.
+				This is necessary for unchecking to work cleanly.
+		-if all entries matched, then clear the onsubmit listener if it was 
+		set.
+
+
+
+---
+
+WHAT IS THIS:
+
+Synopsis:
+$(dom).multiSelection({options});
+
+options:
+data:
+	An array or associative array of the data to be selected from. An 
+	associative array can allow to have different display value then what is 
+	sent through the form.
+name: 
+	sets the names for the checkbox inputs.
+hasButton: 
+	true or false, whether to include a button on the right side of the input
+	to click to show the checkboxes.
+errorCallback:
+	the function to call when a user error occurs.
+hasFixInError:
+	adds a link to the errorCallback that when clicked removes all faulty 
+	entries in the text.
+canCancelSubmission:
+	allows the input element to cancel a submission if it is invalid.
+textCSS:
+	Sets the CSS for the text input box.
+tooltipOptions:
+	Sets the options for the jquery tooltip that is created for the 
+	autocomplete.
+checkboxCSS:
+	Sets the CSS for the checkbox labels.
+checkboxContainerCSS:
+	Sets the CSS for the checkbox container.
