@@ -1,22 +1,14 @@
 TODO:
 
 [auto-complete]
--create a function that takes an array/associative array, and a string, and
- returns a new array with only the elements the contain the string.
--update the function to have an option "loose" that uses the regex I created
-	-[hjk].?[as].?[asd].?[iop].?[bnm] for jason.
- on my desktop.
--create a jquery function extension that takes an array, css, and callback. The callback takes a parameter which would be the value of the item selected. The css is for position and sizing the container. (like autocomplete anywhere with any text.)
-	-make the div and have it use the css and show up with the divs from the 
-	array. If associative then put the key in the name attribute and the 
-	value as the text, otherwise use the value for both the name and the text
-	-have the callback be triggered with the div that was clicked's name 
-	passed as the parameter.
--Have the auto-complete work for when the input is typed in.
-	-First tie it together in the most basic way, not including commas.
-	-Take the caret position and find the first comma after it, and the first
-	comma before it. Trim the whitespace before and after, and use this text.
+-add key overwrites for up, down, and enter(when element highlighted), tab(when element highlighted)
 -Whenever a checkbox is checked or unchecked, update the list for autocomplete. This way the user can't put in duplicate items, and it allows them to search for what they need faster with less items to choose from.
+
+[fix the console automatically showing up for the dialogsystem]
+	-it shouldn't be attached to any DOM in the first place =x.
+
+[clean up for jQuery plugin]
+-remove all global functions, and put them into the plugin itsself.
 
 DONE:
 [checkboxes]
@@ -52,7 +44,29 @@ DONE:
 		-if all entries matched, then clear the onsubmit listener if it was 
 		set.
 
-
+[auto-complete]
+-create a function that takes an array/associative array, and a string, and
+ returns a new array with only the elements the contain the string.
+-update the function to have an option "loose" that uses the regex I created
+	-[hjk].?[as].?[asd].?[iop].?[bnm] for jason. Make sure it's case insensative.
+-create a jquery function extension that takes an array, css, and callback. The callback takes a parameter which would be the value of the item selected. The css is for position and sizing the container. (like autocomplete anywhere with any text.)
+	-make the div and have it use the css and show up with the divs from the 
+	array. 
+	-have the callback be triggered with the div that was clicked's name 
+	passed as the parameter.
+-Have the auto-complete work for when the input is typed in.
+	-First tie it together in the most basic way, not including commas.
+		-Turn the autocomplete into a regular JS class.
+		-create a new instance of autocomplete in the plugin.
+			-during initialization the autocomplete should start off hidden.
+		-have the onkey of the plugin update the autocomplete via update method.
+			-the onkeydown method should .hide all inner divs,
+			-then filter the list using the fnc i made,
+			-then it should .show all divs that are left after the filter.
+		-have the onblur of the plugin call hide on the autocomplete.container div object.
+	-Take the caret position and find the first comma after it, and the first
+	comma before it. Trim the whitespace before and after, and use this text.
+-update the selection to work properly with the commas.
 
 ---
 
