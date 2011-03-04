@@ -298,6 +298,7 @@ function portableAutoComplete(options)
 			this.choices[options["arr"][i]] = option;
 			this.available[options["arr"][i]] = true;
 			option.css("cursor", "pointer");
+			option.css("border", "dotted 1px black");
 			//more ewww hover code.
 			option.css("backgroundColor", defaultBGColor);
 			option.hover(function() {
