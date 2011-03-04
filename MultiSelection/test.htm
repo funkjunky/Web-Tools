@@ -8,7 +8,12 @@
  <script type="text/javascript" src="jquery.multiselection.js"></script>
  <script type="text/javascript">
  $(function() {
-	$("#multisel").multiSelection({data: ["apple", "orange", "girrafe", "coffee table"], name: "fruit", errorCallback: UserWarning});
+	$("#multisel").multiSelection({
+			  data: ["apple", "orange", "girrafe", "coffee table"], 
+			  name: "fruit", 
+			  errorCallback: UserWarning, 
+			  hasFixInError: true
+	});
  });
  </script>
 </head>

@@ -1,14 +1,21 @@
 TODO:
 
 [auto-complete]
--add key overwrites for up, down, and enter(when element highlighted), tab(when element highlighted)
--Whenever a checkbox is checked or unchecked, update the list for autocomplete. This way the user can't put in duplicate items, and it allows them to search for what they need faster with less items to choose from.
+
+[add to JS in general]
+-isset function. Or use jQueries if it exists. and replace all code that does a typeof check.
 
 [fix the console automatically showing up for the dialogsystem]
 	-it shouldn't be attached to any DOM in the first place =x.
 
 [clean up for jQuery plugin]
+-rewrite the maintenance on the autocomplete... adding and removing things and stuff is messy. Write functions to wrap doing those things, so it's one call.
 -remove all global functions, and put them into the plugin itsself.
+-add warningCallback, and NotifyCallback as callback options, and if one is missing, just use the value supplied to the not missing ones. error = (warning > notify), warning = (notify > warning), notify = (warning > error).
+-add the ability to call UserWarning, Error, etc. using a dom element instead of text. if it is a string, then insert as .text, otherwise use .html or if that doesn't work, use .append, but I want to erase anything inside it before attaching, hence not .append.
+
+[add event listeners to jQuery plugins for certain events.]
+-add event listener for autocompletes matchClick, and selected [selectionCallback].
 
 DONE:
 [checkboxes]
@@ -67,6 +74,15 @@ DONE:
 	-Take the caret position and find the first comma after it, and the first
 	comma before it. Trim the whitespace before and after, and use this text.
 -update the selection to work properly with the commas.
+-first entry shouldn't havea  comma at the beginning
+-focus should be given back to the input after clicking the auto-complete.
+-Whenever a checkbox is checked or unchecked, update the list for autocomplete. This way the user can't put in duplicate items, and it allows them to search for what they need faster with less items to choose from.
+-(nevermind)clicking the selection should call "checkboxChecked"
+	-Everything goes through onchange.
+-their appears to be a bug... something to do with giraffe.
+-remove the true false thing on hover. bottom right.
+-make sure you can have an associative array for the choices.
+-disable up going to the beginning of the input, and down going to the end. Somehow. Ask on facebook about whether it's ok to overwrite default things in a browser if those features are dumb and no one uses them.
 
 ---
 

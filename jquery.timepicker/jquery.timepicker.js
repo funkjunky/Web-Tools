@@ -2,6 +2,8 @@
 //TODO: turn the grabbing of html into a function literal and use jquery's clone method to create new instances.
 $(function() {
 	$.fn.timepicker = function(options) {
+		var onMenu = false;
+
 		var defaults = 
 		{
 			precision: 48, //24 * 2 (2 halfs to an hour, 1:30, 2:00, 2:30, etc.)
@@ -19,6 +21,8 @@ $(function() {
 		var toHandle = -1;
 	 	this.createDOM = function() {
 			var listbox = this.getCustomListbox();
+			listbox.mousemove(function() {	onMenu = true;		});
+			listbox.mouseout(function() { 	onMenu = false;	});
 			listbox.hide();
 			$(document.body).append(listbox);
 			selection.click(function() { 
@@ -58,12 +62,11 @@ $(function() {
 						$(this).val(s);
 					}
 				}
-				else
-					toHandle = setTimeout(
-						options["userErrorCallback"]("Invalid time entered."),
-						100);
+				else if(!onMenu)
+					options["userErrorCallback"].call("Invalid time entered.");
 
-				setTimeout(function(){$(listbox).hide();}, 500);
+				if(!onMenu)
+					$(listbox).hide();
 			});
 		}; //createDOM
 

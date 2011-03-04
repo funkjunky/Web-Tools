@@ -1,6 +1,4 @@
 $(function() {
-	getLooseKeyboardRegex("Jason");
-
 	$.fn.multiSelection = function(options) {
 		var autocomplete = 0;
 		var cbContainer = 0;
@@ -15,8 +13,9 @@ $(function() {
 			name: $(this).attr("name"),
 			hasButton: true,
 			errorCallback: alert,
-			canCancelSubmission: false
-			//hasFixInError
+			canCancelSubmission: false,
+			autoCorrect: false,
+			hasFixInError: false
 		};
 		var options = $.extend(defaults, options);
 		var selection = $(this);
@@ -69,17 +68,41 @@ $(function() {
 			$(document.body).append(autocomplete.container);
 
 			selection.focus(function(){
+				selection.keyup();
 				autocomplete.container.show();
 			});
 			
-			autocomplete.container.mousemove(function() {	console.text("true");onMenu = true;	});
-			autocomplete.container.mouseout(function() {		console.text("false");onMenu = false; });
+			autocomplete.container.mousemove(function() { onMenu = true;	});
+			autocomplete.container.mouseout(function() {	onMenu = false; });
 			selection.blur(function(){
-				if(!onMenu)
+				if(!onMenu) {
 					autocomplete.container.hide();
+					//TODO: this should go with a hide method that should be a member of autocomplete.
+					autocomplete.index = false;
+				}
 			});
 
+			selection.keydown(keydown);
+
 			selection.keyup(keyup);
+		};
+
+		var keydown = function(e) {
+			var code = e.keyCode || e.which;
+			//these numbers should be enumerated somewhere.
+			if(code ==38 || code == 40 || code == 9 || code == 13) {
+				if(code == 38)	//up
+					autocomplete.indexUp();
+				else if(code == 40) //down
+					autocomplete.indexDown();
+				//TODO: I eventually want tab to guess the autocomplete, and enter to only work if something is selected, but that's later.
+				else if(code == 9 || code == 13) { //tab
+					if(autocomplete.index !== false)
+						selectionCallback(autocomplete.index);
+				}
+				e.stopPropagation();
+				return false;
+			}
 		};
 
 		var keyup = function() {
@@ -108,38 +131,61 @@ $(function() {
 			var after = selection.val()
 								.substring(endComma, selection.val().length);
 			//before + " " + str + after
-			selection.val(before + ", " + str + after);
+			var seperator = "";
+			if(startComma != 0)
+				seperator = ", ";
+			selection.val(before + seperator + str + after);
 			autocomplete.container.hide();
+			autocomplete.index = false;
+			selection.change();
+
+			selection.focus();
 		};
 
 		var selectionOnChange = function() {
-			if(!onMenu)
+			if($(autocomplete.container).is(":hidden") || !onMenu)
 			{
-				//clear checkboxes (their may be a more effecient way)
-				for(var i in cbs) 
-					cbs[i].attr("checked", false);
 				//explode on comma
 				var items = $(this).val().split(",");
+
+				//clear checkboxes (their may be a more effecient way)
+				for(var i in cbs) { 
+					if(cbs[i].attr("checked") == true) {	  
+						cbs[i].attr("checked", false);
+						cbs[i].change();
+					}
+				}
 				//clean up whitespace and check the boxes and if any failure,
 				//then set an onsubmit on the form to warn the user.
 				var hasFailed = false;
-				var cleanedInput = "";
+				//clear the input. Checking the boxes will fill it in again.
+				$(this).val("");
 				for(var i=0; i != items.length; ++i)
 				{
 					var item = $.trim(items[i]);
 					if(item != "" && typeof cbs[item] == "undefined") {
 						hasFailed = true;
-						options["errorCallback"].call(window, "item #" + i 
+						var message = "item #" + i 
 							+ " failed with text '"+ item 
-							+ "' which is not a valid choice.");
+							+ "' which is not a valid choice.";
+						if(options["hasFixInError"])
+							message += "<br />To correct this click "
+								+ "<a onclick=''>here</a>.";
+						options["errorCallback"].call(window, message);
+						if(!options["autoCorrect"]) {
+							if(i != 0)
+								$(this).val($(this).val() + ", ");
+							$(this).val($(this).val() + item);
+						}
 					}
 					else if(item != "")
 					{
-						cbs[item].attr("checked", true);
-						cleanedInput += item + ", ";
+						if(cbs[item].attr("checked") == false) {
+							cbs[item].attr("checked", true);
+							cbs[item].change();
+						}
 					}
 				}
-				cleanedInput = cleanedInput.substr(0,cleanedInput.length-2);
 
 				if(hasFailed)
 					$("form:has([name="+options["name"]+"])").submit(function() {
@@ -147,8 +193,6 @@ $(function() {
 							"The submission has been canceled, because the multi selection is invalid (I need to update this to somehow state which one, or provide a link to highlight, which one, or something...)");
 					return options["canCancelSubmission"];
 				});
-				else
-					$(this).val(cleanedInput);
 			}
 		};
 
@@ -186,14 +230,15 @@ $(function() {
 			newInputStr += this.value;
 	
 			selection.val(newInputStr);
+			autocomplete.disable(this.value);
 		};
 		var checkboxUnchecked = function() {
 			var inputValStr = selection.val();
 			//search for the first occurance of value, then slice the string
 			var indexOfVal = inputValStr.indexOf(this.value);
-			if(indexOfVal == -1)
-				return options["errorCallback"].call(window,
-					"The text input does not contain the options you unchecked. This is just a warning");
+			//if(indexOfVal == -1)
+			//	return options["errorCallback"].call(window,
+			//		"The text input does not contain the options you unchecked. This is just a warning");
 			//their are two cases. One is that it's the first string.
 			if(indexOfVal == 0)
 				//+2 is the comma and space.
@@ -206,6 +251,8 @@ $(function() {
 					+ inputValStr.substring(indexOfVal + this.value.length)
 
 			selection.val(inputValStr);
+
+			autocomplete.enable(this.value);
 		};
 
 		_init();
@@ -215,8 +262,17 @@ $(function() {
 function portableAutoComplete(options)
 {
 	this.options = {};
+	//permenant choices
+	this.available = {};
+	//restricted choices
 	this.choices = {};
+	//choices that can be chosen accoridng to latest update.
+	this.currentChoices = {};
+	//internal variables.
 	this.container = 0;
+	//index contains what the current selection is.
+	this.index = false;
+	var defaultBGColor = "rgb(255, 255, 255)";
 	var self = this;
 
 	var defaults =
@@ -240,8 +296,9 @@ function portableAutoComplete(options)
 				this.options["errorCallback"].call(window
 					, "You can not have identical choices in autocomplete.");
 			this.choices[options["arr"][i]] = option;
+			this.available[options["arr"][i]] = true;
+			option.css("cursor", "pointer");
 			//more ewww hover code.
-			var defaultBGColor = "rgb(255, 255, 255)";
 			option.css("backgroundColor", defaultBGColor);
 			option.hover(function() {
 				if($(this).css("backgroundColor") == defaultBGColor)
@@ -250,14 +307,133 @@ function portableAutoComplete(options)
 					$(this).css("backgroundColor", defaultBGColor);
 			});
 			//
+
+			option.mousemove(function() { $(this).index = $(this).text(); });
+			option.mouseout(function() { 
+				if(this.index == $(this).text()) 
+					this.index = false;
+			});
 		
 			option.click(function() {
 				self.options["selectionCallback"].call(window, $(this).text());
+				//TODO: remove me and put me in a hide method.
+				autocomplete.index = false;
 			});
 	
 			this.container.append(option);
 		}
+
 		this.container.hide();
+	};
+
+	//I do the index by searching through the avialable array, till I find
+	//where the previous index was and then i use the index before or after
+	//that.
+	this.indexUp = function() {
+		if(objLen(this.currentChoices) <= 0)
+			return;
+		var prev;
+		//set prev to initially be the first element.
+		for(var i in this.currentChoices) { prev = i; break; }
+
+		//if no element selected yet.
+		if(this.index === false)
+			//select the first element.
+			this.index = prev;
+		else {
+			//set the choice BG to it's default colour.
+			this.currentChoices[this.index].css("backgroundColor", defaultBGColor);
+			var isLast = false;
+			var i;
+			for(i in this.currentChoices) {
+				//if the first element matches, then prepare to set as last ele
+				if(this.index == i && i == prev)
+					isLast = true;
+	
+				//if we have found the index, then moving up, will select
+				//the 'prev'ious element.
+				if(!isLast && i == this.index) {
+					this.index = prev;
+					//if we found the element, then we are done.
+					break;
+				} else prev = i;
+			}
+			if(isLast)
+				this.index = i;
+		}
+		this.currentChoices[this.index].css("backgroundColor", "#AFEEEE");
+	};
+	this.indexDown = function() {
+		if(objLen(this.currentChoices) <= 0)
+			return;
+		var prev, first;
+		//set prev to initially be the first element.
+		for(var i in this.currentChoices) { first = prev = i; break; }
+
+		//if no element selected yet.
+		if(this.index === false) 
+			//select the first element.
+			this.index = prev;
+		else {
+			//set the previous element to it's default BG Colour.
+			this.currentChoices[this.index].css("backgroundColor", defaultBGColor);
+			var wasFound = false;
+			var i;
+			for(i in this.currentChoices) {
+				if(wasFound) {
+					this.index = i;
+					//resolve "wasFound"
+					wasFound = false;
+					break;
+				}
+				if(i == this.index)
+					wasFound = true;
+			}
+			//if this.index was found last and not yet resolved, then loop it to first.
+			if(wasFound)
+				this.index = first;
+		}
+		this.currentChoices[this.index].css("backgroundColor", "#AFEEEE");
+	};
+
+	this.disable = function(str) {
+		if(typeof this.available[str] == "undefined")
+			this.options["errorCallback"].call(window,
+				"You cannot disable a choice that does not exist.");
+		else {
+			this.available[str] = false;
+			//if it is unavailable, then it should be hidden, because it can't be chosen.
+			if(typeof this.currentChoices[str] != "undefined")
+				this.currentChoices[str].hide();
+		}
+	};
+
+	this.enable = function(str) {
+		if(typeof this.available[str] == "undefined")
+			this.options["errorCallback"].call(window,
+				"You cannot enable a choice that does not exist. If you want to add a choice, then use the add function.");
+		else //just because it is available, doesn't mean it is shown.
+			this.available[str] = true;
+	};
+
+	this.add = function(str) {
+		//TODO: write code for adding choices.
+		this.options["errorCallback"].call(window, "portableAutoComplete.add isn't implemented yet.");
+	};
+
+	this.remove = function(str) {
+		//TODO: write code for removing choices.
+		this.options["errorCallback"].call(window, "portableAutoComplete.remove isn't implemented yet.");
+	};
+
+	this.getChoices = function() {
+		var choices = {};
+		//only add to the returning array, if it is "available"
+		for(var i in this.available)
+			if(this.available[i])
+				choices[i] = this.choices[i];
+
+		return choices;
 	};
 
 	this.update = function(str) {
@@ -265,16 +441,23 @@ function portableAutoComplete(options)
 		//if it is still very responsive, then set this to true.
 		//really their should be an option.
 		var arrMatched = [];
+		var choices = this.getChoices();
 		if($.trim(str) != "")
-			arrMatched = matchedElements(getKeys(this.choices), str, false);
+			arrMatched = matchedElements(getKeys(choices), str, false);
 
 		//hide all choices. Clean slate.
-		for(i in this.choices)
-			this.choices[i].hide();
+		for(i in choices) {
+			choices[i].hide();
+		}
+		this.currentChoices = {};
 
 		//show only the matched elements.
-		for(var i = 0; i != arrMatched.length; ++i)
-			this.choices[arrMatched[i]].show();
+		for(var i = 0; i != arrMatched.length; ++i) {
+			choices[arrMatched[i]].show();
+			this.currentChoices[arrMatched[i]] = choices[arrMatched[i]];
+		}
+		if(typeof this.currentChoices[this.index] == "undefined")
+			this.index = false;
 	};
 
 	this._init(this.options);
@@ -307,7 +490,7 @@ function _me_forArr(arr, val, isLoose)
 	var newarr = [];
 
 	for(var i in arr)
-		if(arr[i].indexOf(val) != -1)
+		if(arr[i].indexOf(val) != -1 && arr[i] != val)
 			newarr.push(arr[i]);
 
 	return newarr;
@@ -318,7 +501,7 @@ function _me_forObj(arr, val)
 	var newarr = {};
 
 	for(var i in arr)
-		if(arr[i].indexOf(val) != -1)
+		if(arr[i].indexOf(val) != -1 && arr[i] != val)
 			newarr[i] = arr[i];
 	
 	return newarr;
@@ -331,7 +514,7 @@ function _me_forArrL(arr, val, isLoose)
 	var rgx = getLooseKeyboardRegex(val);
 
 	for(var i in arr)
-		if(rgx.test(arr[i]))
+		if(rgx.test(arr[i]) && arr[i] != val)
 			newarr.push(arr[i]);
 
 	return newarr;
@@ -344,7 +527,7 @@ function _me_forObjL(arr, val)
 	var rgx = getLooseKeyboardRegex(val);
 
 	for(var i in arr)
-		if(rgx.test(arr[i]))
+		if(rgx.test(arr[i]) && arr[i] != val)
 			newarr[i] = arr[i];
 	
 	return newarr;
@@ -457,3 +640,5 @@ function getFirstCharAfterCaret(jobj, char)
 
 	return endComma;
 }
+
+function objLen(obj) { var c = 0; for(var i in obj) ++c; return c;}
