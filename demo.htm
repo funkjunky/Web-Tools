@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <title>This is to test out all of the tools built here.</title>
+    <script src="jquery.min.js"></script>
+    <script src="jquery.timepicker.js"></script>
+    <script src="jquery.multiselection.js"></script>
+    <script src="messageGraphicsSystem.js"></script>
+    <script type="text/javascript">
+      $(function() {
+        $("#timepicker").timepicker({userErrorCallback: UserWarning});
+        $("#multiselection").multiSelection({
+          data: ["apple", "banana", "orange", "giraffe", "coffee table"],
+          name: "usually_fruit",
+          errorCallback: UserWarning,
+          hasFixInError: false
+        });
+        $("#triggerwarning").click(function() { 
+          Warning("You have triggered a warning via visual "
+                    + "clicking device [button].");
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <label>Time Picker</label><input type="text" id="timepicker" autocomplete="off" /><br />
+    <label>Multiselection</label><input type="text" id="multiselection" autocomplete="off" /><br />
+    <button id="triggerwarning">Trigger Warning</button><br />
+  </body>
+</html>
