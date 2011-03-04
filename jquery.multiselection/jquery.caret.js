@@ -31,4 +31,4 @@ if( document.selection ){
 		return $(element).get(0).selectionStart;
 	}
   }
-};
+});
