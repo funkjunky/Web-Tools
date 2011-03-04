@@ -63,7 +63,7 @@ $(function() {
 					}
 				}
 				else if(!onMenu)
-					options["userErrorCallback"].call("Invalid time entered.");
+					options["userErrorCallback"].call(window, "Invalid time entered.");
 
 				if(!onMenu)
 					$(listbox).hide();
