@@ -14,7 +14,7 @@ var toHandle=-1;this.createDOM=function(){var listbox=this.getCustomListbox();li
 {var s=$(this).val();if(s.substr(-1,1)=="m")
 s=s.substr(0,s.length-2);s=s.replace(/^([1-9]|1[0-2])$/,"$1:00"+options["am_or_pm"]);s=s.replace(/^((?:[1-9]|1[0-2]):)$/,"$100"+options["am_or_pm"]);s=s.replace(/^((?:[1-9]|1[0-2]):[0-5])$/,"$10"+options["am_or_pm"]);$(this).val(s);}}
 else if(!onMenu)
-options["userErrorCallback"].call("Invalid time entered.");if(!onMenu)
+options["userErrorCallback"].call(window,"Invalid time entered.");if(!onMenu)
 $(listbox).hide();});};this.getCustomListbox=function(){var times=getTimeArray(options["precision"]);var containingDiv=$("<div />");containingDiv.css({position:"absolute",top:selection.offset().top+20+"px",left:selection.offset().left+"px",height:"100px",width:"80px",cursor:"pointer",overflow:"scroll"});for(var i in times)
 {var timeDiv=$("<div />");timeDiv.append(times[i]);var defaultBGColor="rgb(255, 255, 255)";timeDiv.css("backgroundColor",defaultBGColor);timeDiv.hover(function(){if($(this).css("backgroundColor")==defaultBGColor)
 $(this).css("backgroundColor","#AFEEEE");else
