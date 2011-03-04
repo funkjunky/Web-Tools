@@ -1,4 +1,5 @@
-new function($) {
+//this was originally done by someone else, but I redid it so it doesn't rely on order.
+$(function() {
   $.fn.caret = function(pos) {
 	if(typeof pos != "undefined") {
     if ($(this).get(0).setSelectionRange) {
@@ -30,4 +31,4 @@ if( document.selection ){
 		return $(element).get(0).selectionStart;
 	}
   }
-}(jQuery);
+};

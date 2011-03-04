@@ -2,7 +2,9 @@ TODO:
 
 [auto-complete]
 -package the jquery plugin on Preney's server.
+-fix the caret needing to be after the messageGraphicsSystem
 -write an email explaining how to use each plugin. If it is tricky to explain any plugin, then don't send the email and rework code to make it easy.
+-make a new iteration of the plugin that updates the checkboxes on keyup
 
 [add to JS in general]
 -isset function. Or use jQueries if it exists. and replace all code that does a typeof check.
