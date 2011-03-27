@@ -103,7 +103,7 @@ $(function() {
 
 				timeDiv.click(function() {
 					clearTimeout(toHandle);
-					selection.val($(this).text());
+					$(this).val($(this).text());
 					containingDiv.hide();
 				});
 
