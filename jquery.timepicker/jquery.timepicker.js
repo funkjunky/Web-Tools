@@ -11,27 +11,26 @@ $(function() {
 			userErrorCallback: alert
 		};
 		var options = $.extend(defaults, options);
-		var selection = $(this);
 
-		this.init = function()
+		function _init()
 		{
-			this.createDOM();
+			createDOM($(this));
 		}
 
 		var toHandle = -1;
-	 	this.createDOM = function() {
-			var listbox = this.getCustomListbox();
+	 	function createDOM(self) {
+			var listbox = getCustomListbox(self);
 			listbox.mousemove(function() {	onMenu = true;		});
 			listbox.mouseout(function() { 	onMenu = false;	});
 			listbox.hide();
 			$(document.body).append(listbox);
-			selection.click(function() { 
+			self.click(function() { 
 				listbox.show();
 			});
-			selection.keypress(function() {
+			self.keypress(function() {
 				listbox.hide();
 			});
-			selection.blur(function() {
+			self.blur(function() {
 				//test to see if the format is correct.
 				if("" == $(this).val() 
 					|| /^([1-9]|1[0-2])(:([0-5][0-9]?)?)?(am|pm)?$/
@@ -70,15 +69,15 @@ $(function() {
 			});
 		}; //createDOM
 
-		this.getCustomListbox = function() {
+		function getCustomListbox (self) {
 			var times = getTimeArray(options["precision"]);
 			var containingDiv = $("<div />");
 
 			//set the height to be small, position to be absolute.
 			//also set the top and left to be where the input is.
 			containingDiv.css({position: "absolute", 
-				top: selection.offset().top + 20 + "px", 
-				left: selection.offset().left + "px",
+				top: self.offset().top + 20 + "px", 
+				left: self.offset().left + "px",
 				height: "100px",
 				width: "80px",
 				cursor: "pointer",
@@ -103,7 +102,7 @@ $(function() {
 
 				timeDiv.click(function() {
 					clearTimeout(toHandle);
-					$(this).val($(this).text());
+					$(self).val($(this).text());
 					containingDiv.hide();
 				});
 
@@ -113,6 +112,6 @@ $(function() {
 			return containingDiv;
 		};	//getCustomListbox
 
-		this.init();
+		return this.each(_init);
 	}; //end timepicker
 });
