@@ -8,9 +8,8 @@
  <script type="text/javascript" src="jquery.multiselection.js"></script>
  <script type="text/javascript">
  $(function() {
-	$("#multisel").multiSelection({
+	$(".multisel").multiSelection({
 			  data: ["apple", "orange", "girrafe", "coffee table"], 
-			  name: "fruit", 
 			  errorCallback: UserWarning, 
 			  hasFixInError: true
 	});
@@ -19,7 +18,8 @@
 </head>
 <body>
 <form>
-<input type="text" id="multisel" autocomplete="off" /><br />
+<input type="text" class="multisel" id="fruit" autocomplete="off" /><br />
+<input type="text" class="multisel" id="fruit2" autocomplete="off" /><br />
 <input type="submit" value="SUBMIT ME!!!" />
 </form>
 </body>
