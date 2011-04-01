@@ -1,5 +1,122 @@
 $(function() {
 	$.fn.multiSelection = function(options) {
+		//these methods rely on having the correct this context.
+		var methods = {
+			/*
+			data: function(arr) {
+				var $this = $(this).data("multiSelection");
+
+				if(typeof arr == "undefined")
+				{
+					return $this.data;
+				}
+				else
+				{
+					$this.data = arr;
+					//call functions to update changes.
+					return $this;
+				}
+			},
+			*/
+			init: function() {
+				var $this = $(this).data("multiSelection");
+				//selection here is a quick hack, 'cause I'm too lazy
+				//to remove selection. I should remove this at some point.
+				var selection = $(this);
+
+				if(count($this["data"]) <= 0)
+					$this.options["errorCallback"].call(window,
+					 "The data provided to multiSelection contains no elements.");
+				//get the selectionCallback
+				$this.selectionCallback = getSelectionCallback(selection);
+
+				//create the div that contains the checkboxes.
+				$this.cbContainer = $("<div />");
+				//for each datum, create a label and checkbox and append it
+				//If data is an array, then use the value for the value as well.
+				if($.isArray($this["data"]))
+					for(var i=0; i!=$this["data"].length; ++i)
+						$this.cbContainer.append(
+							_getCheckbox
+								($this["data"][i], $this["data"][i]
+									, $this["cbs"], $this["options"]["name"]
+									, selection));
+				//If the data is associative, then use the key as the value.
+				else
+					for(var i in $this["data"])
+						$this.cbContainer
+							.append(
+								_getCheckbox(i, $this["data"][i]
+									, $this["cbs"], $this["options"]["name"]
+									, selection));
+	
+				$this.cbContainer.hide();
+	
+				if($this.options["hasButton"])
+				{
+					selection.after($this.cbButton = _createButton());
+					$this.cbButton.click(function() {
+						$this.cbContainer.toggle();
+					});
+					$this.cbButton.after($this.cbContainer);
+				} else
+					selection.after($this.cbContainer);
+	
+				selection.change(selectionOnChange);
+	
+				$this.autocomplete = new portableAutoComplete({
+						  arr: $.makeArray($this["data"]), 
+						  css: {
+						  	position: "absolute", 
+						  	top: selection.offset().top+selection.height()+6+"px",
+						  	left: selection.offset().left+"px" },
+						  selectionCallback: $this.selectionCallback
+				});
+				$(document.body).append($this.autocomplete.container);
+	
+				selection.focus(function(){
+					$(this).keyup();
+					$this.autocomplete.container.show();
+				});
+				
+				$this.autocomplete.container.mousemove(function() { 
+					$this.onMenu = true;	
+				});
+				$this.autocomplete.container.mouseout(function() {	
+					$this.onMenu = false; 
+				});
+				selection.blur(function(){
+					if(!$this.onMenu) {
+						$this.autocomplete.container.hide();
+						//TODO: this should go with a hide method that should be a member of autocomplete.
+						$this.autocomplete.index = false;
+					}
+				});
+	
+				selection.keydown(keydown);
+	
+				selection.keyup(keyup);
+			},
+			getItemByCaret: function(jdom) {
+				var startComma = getFirstCharBeforeCaret(jdom, ",");
+				//I don't want to include the caret.
+				if(startComma != 0) ++startComma;
+				var endComma = getFirstCharAfterCaret(jdom, ",");
+	
+				//now we can grab the current item the user is typing.
+				var currentItem = 
+					$.trim(jdom.val().substring(startComma, endComma));
+	
+				return currentItem;
+			}
+		};
+
+	if(methods[options]) {
+		return methods[options].apply(this, Array.prototype.slice.call(arguments, 1));
+	} else if(typeof options == "object") {
+
+		return this.each(function() {
+				  //I think i can just delete seletion here.
 		var defaults =
 		{
 			data: [],
@@ -10,150 +127,162 @@ $(function() {
 			autoCorrect: false,
 			hasFixInError: false
 		};
-		var options = $.extend(defaults, options);
+		var onMenu = false;
+		var selectionCallback = function(){};
+		var autocomplete = 0;
+		var cbContainer = 0;
+		var cbButton = 0;
+		var cbs = {};
+		var l_options = $.extend(defaults, options);
+		var data = l_options.data; delete l_options["data"];
+		var dataObj = {
+				  data: data, 
+				  options: l_options,
+				  
+				  onMenu: onMenu, 
+				  autocomplete: autocomplete,
+				  cbContainer: cbContainer,
+				  cbButton: cbButton,
+				  cbs: cbs,
+				  selectionCallback: selectionCallback
+		};
 
-		return this.each(function() {
-			var autocomplete = 0;
-			var cbContainer = 0;
-			var cbButton = 0;
-			var cbs = {};
-		
-			var onMenu = false;
+			$(this).data("multiSelection", dataObj);
 			var selection = $(this);
+			var $this = $(this).data("multiSelection");
 
 			var console = $("<div />");
 			console.css({position: "fixed", bottom: "0px", right: "0px"});
 			$(document.body).append(console);
 
-			var _init = function() {
-				if(count(options["data"]) <= 0)
-					options["errorCallback"].call(window,
-					 "The data provided to multiSelection contains no elements.");
-				//create the div that contains the checkboxes.
-				cbContainer = $("<div />");
+			methods.init.call(this);
+		}); //end this.each
+	} 
+	else 
+		alert("incorrect use~!!!"); //I should use the errorCallback.
+	}; //end multiselection
+}); //end onload
 
-				//for each datum, create a label and checkbox and append it
-				//If data is an array, then use the value for the value as well.
-				if($.isArray(options["data"]))
-					for(var i=0; i!=options["data"].length; ++i)
-						cbContainer.append(
-							_getCheckbox(options["data"][i], options["data"][i]));
-				//If the data is associative, then use the key as the value.
-				else
-					for(var i in options["data"])
-						cbContainer
-							.append(_getCheckbox(i, options["data"][i]));
+////////multiSelection class methods///////////////
+///////////////////////////////////////////////////
 	
-				cbContainer.hide();
-	
-				if(options["hasButton"])
-				{
-					cbButton = _createButton();
-					cbButton.click(function() {
-						cbContainer.toggle();
-					});
-					cbButton.after(cbContainer);
-				} else
-					selection.after(cbContainer);
-	
-				selection.change(selectionOnChange);
-	
-				autocomplete = new portableAutoComplete({
-						  arr: $.makeArray(options["data"]), 
-						  css: {
-						  	position: "absolute", 
-						  	top: selection.offset().top+selection.height()+6+"px",
-						  	left: selection.offset().left+"px" },
-						  selectionCallback: selectionCallback
-				});
-				$(document.body).append(autocomplete.container);
-	
-				selection.focus(function(){
-					$(this).keyup();
-					autocomplete.container.show();
-				});
-				
-				autocomplete.container.mousemove(function() { onMenu = true;	});
-				autocomplete.container.mouseout(function() {	onMenu = false; });
-				selection.blur(function(){
-					if(!onMenu) {
-						autocomplete.container.hide();
-						//TODO: this should go with a hide method that should be a member of autocomplete.
-						autocomplete.index = false;
+			function _getCheckbox(value, text, cbs, name, input) {
+				//omg eww... $this is generally bad but necessary.
+				//selection is me being lazy.
+				var selection = input;
+				var $this = input.data("multiSelection");
+				var id = value + text;
+				var checkbox = cbs[value] = $("<input />");
+				checkbox.attr("type", "checkbox");
+				checkbox.attr("id", id);
+				checkbox.attr("name", name + "[]");
+				checkbox.val(value);
+				checkbox.change(function() {
+					if($(this).attr("checked")) {
+						var newInputStr = selection.val();
+						if($.trim(selection.val()).length > 0)
+							newInputStr += ", ";
+						newInputStr += $(this).val();
+		
+						selection.val(newInputStr);
+						$this.autocomplete.disable(this.value);
+					}
+					else{
+						var inputValStr = selection.val();
+						//search for the first occurance of value, then slice the 
+						//string
+						var indexOfVal = inputValStr.indexOf(this.value);
+						//if(indexOfVal == -1)
+						//	return options["errorCallback"].call(window,
+						//		"The text input does not contain the options you 
+						//unchecked. This is just a warning");
+						//their are two cases. One is that it's the first string.
+						if(indexOfVal == 0)
+							//+2 is the comma and space.
+							inputValStr = inputValStr.substring(0, indexOfVal)
+								+ inputValStr.substring(indexOfVal 
+																+ this.value.length + 2);
+						//the second is any other space, including last.
+						else
+							//the -2 is the comma and space before the value.
+							inputValStr = inputValStr.substring(0, indexOfVal-2)
+								+ inputValStr.substring(indexOfVal + this.value.length)
+			
+						selection.val(inputValStr);
+			
+						$this.autocomplete.enable(this.value);
 					}
 				});
+				var label = $("<label for='"+id+"'>"+text+"</label>");
+				var container = $("<div />");
 	
-				selection.keydown(keydown);
-	
-				selection.keyup(keyup);
+				return container.append(checkbox).append(label);
 			};
-	
-			var keydown = function(e) {
+
+			function keydown(e) {
+				var $this = $(this).data("multiSelection");
+
 				var code = e.keyCode || e.which;
 				//these numbers should be enumerated somewhere.
 				if(code ==38 || code == 40 || code == 9 || code == 13) {
 					if(code == 38)	//up
-						autocomplete.indexUp();
+						$this.autocomplete.indexUp();
 					else if(code == 40) //down
-						autocomplete.indexDown();
+						$this.autocomplete.indexDown();
 					//TODO: I eventually want tab to guess the autocomplete, and enter to only work if something is selected, but that's later.
 					else if(code == 9 || code == 13) { //tab
-						if(autocomplete.index !== false)
-							selectionCallback(autocomplete.index);
+						if($this.autocomplete.index !== false)
+							$this.selectionCallback.call($this.autocomplete, $this.autocomplete.index);
 					}
 					e.stopPropagation();
 					return false;
 				}
 			};
 	
-			var keyup = function() {
-				var item = getItemByCaret();
-				autocomplete.update(item);
+			function keyup() {
+				var $this = $(this).data("multiSelection");
+
+				var item = $(this).multiSelection("getItemByCaret", $(this));
+				$this.autocomplete.update(item);
 			};
-			var getItemByCaret = function() {
-				var startComma = getFirstCharBeforeCaret(selection, ",");
-				//I don't want to include the caret.
-				if(startComma != 0) ++startComma;
-				var endComma = getFirstCharAfterCaret(selection, ",");
+
+			//is this bad? How could I possibly avoid this =\
+			function getSelectionCallback(selection) {
+				return function(str) {
+					//get substr before comma
+					var startComma = getFirstCharBeforeCaret(selection, ",");
+					var before = selection.val().substring(0, startComma);
+					//get substr after comma
+					var endComma = getFirstCharAfterCaret(selection, ",");
+					var after = selection.val()
+										.substring(endComma, selection.val().length);
+					//before + " " + str + after
+					var seperator = "";
+					if(startComma != 0)
+						seperator = ", ";
+					selection.val(before + seperator + str + after);
+					this.container.hide();
+					this.index = false;
+					selection.change();
 	
-				//now we can grab the current item the user is typing.
-				var currentItem = 
-					$.trim(selection.val().substring(startComma, endComma));
-	
-				return currentItem;
-			};
-	
-			var selectionCallback = function(str) {
-				//get substr before comma
-				var startComma = getFirstCharBeforeCaret(selection, ",");
-				var before = selection.val().substring(0, startComma);
-				//get substr after comma
-				var endComma = getFirstCharAfterCaret(selection, ",");
-				var after = selection.val()
-									.substring(endComma, selection.val().length);
-				//before + " " + str + after
-				var seperator = "";
-				if(startComma != 0)
-					seperator = ", ";
-				selection.val(before + seperator + str + after);
-				autocomplete.container.hide();
-				autocomplete.index = false;
-				selection.change();
-	
-				selection.focus();
+					selection.focus();
+				};
 			};
 	
-			var selectionOnChange = function() {
-				if($(autocomplete.container).is(":hidden") || !onMenu)
+			function selectionOnChange() {
+				$this = $(this).data("multiSelection");
+
+				if($($this.autocomplete.container).is(":hidden") 
+						  || !$this.onMenu)
 				{
 					//explode on comma
 					var items = $(this).val().split(",");
 	
 					//clear checkboxes (their may be a more effecient way)
-					for(var i in cbs) { 
-						if(cbs[i].attr("checked") == true) {	  
-							cbs[i].attr("checked", false);
-							cbs[i].change();
+					for(var i in $this.cbs) { 
+						if($this.cbs[i].attr("checked") == true) {	  
+							$this.cbs[i].attr("checked", false);
+							$this.cbs[i].change();
 						}
 					}
 					//clean up whitespace and check the boxes and if any failure,
@@ -164,16 +293,16 @@ $(function() {
 					for(var i=0; i != items.length; ++i)
 					{
 						var item = $.trim(items[i]);
-						if(item != "" && typeof cbs[item] == "undefined") {
+						if(item != "" && typeof $this.cbs[item] == "undefined") {
 							hasFailed = true;
 							var message = "item #" + i 
 								+ " failed with text '"+ item 
 								+ "' which is not a valid choice.";
-							if(options["hasFixInError"])
+							if($this.options["hasFixInError"])
 								message += "<br />To correct this click "
 									+ "<a onclick=''>here</a>.";
-							options["errorCallback"].call(window, message);
-							if(!options["autoCorrect"]) {
+							$this.options["errorCallback"].call(window, message);
+							if(!$this.options["autoCorrect"]) {
 								if(i != 0)
 									$(this).val($(this).val() + ", ");
 								$(this).val($(this).val() + item);
@@ -181,85 +310,38 @@ $(function() {
 						}
 						else if(item != "")
 						{
-							if(cbs[item].attr("checked") == false) {
-								cbs[item].attr("checked", true);
-								cbs[item].change();
+							if($this.cbs[item].attr("checked") == false) {
+								$this.cbs[item].attr("checked", true);
+								$this.cbs[item].change();
 							}
 						}
 					}
 	
 					if(hasFailed)
-						$("form:has([name="+options["name"]+"])").submit(function() {
-							options["errorCallback"].call(window,
+						$("form:has([name="+$this.options["name"]+"])").submit(function() {
+							$this.options["errorCallback"].call(window,
 								"The submission has been canceled, because the multi selection is invalid (I need to update this to somehow state which one, or provide a link to highlight, which one, or something...)");
-						return options["canCancelSubmission"];
+						return $this.options["canCancelSubmission"];
 					});
 				}
 			};
 	
-			var _getCheckbox = function(value, text) {
-				var id = value + text;
-				var checkbox = cbs[value] = $("<input />");
-				checkbox.attr("type", "checkbox");
-				checkbox.attr("id", id);
-				checkbox.attr("name", options["name"] + "[]");
-				checkbox.val(value);
-				checkbox.change(function() {
-					if($(this).attr("checked"))
-						checkboxChecked.call(this);
-					else
-						checkboxUnchecked.call(this);
-				});
-				var label = $("<label for='"+id+"'>"+text+"</label>");
-				var container = $("<div />");
-	
-				return container.append(checkbox).append(label);
-			};
-	
-			var _createButton = function() {
+			function _createButton() {
 				var button = $("<input />");
 				button.attr("type", "button");
 				button.attr("value", "=");
-				selection.after(button);
+
 				return button;
 			};
 	
-			var checkboxChecked = function() {
-				var newInputStr = selection.val();
-				if($.trim(selection.val()).length > 0)
-					newInputStr += ", ";
-				newInputStr += this.value;
-		
-				selection.val(newInputStr);
-				autocomplete.disable(this.value);
-			};
-			var checkboxUnchecked = function() {
-				var inputValStr = selection.val();
-				//search for the first occurance of value, then slice the string
-				var indexOfVal = inputValStr.indexOf(this.value);
-				//if(indexOfVal == -1)
-				//	return options["errorCallback"].call(window,
-				//		"The text input does not contain the options you unchecked. This is just a warning");
-				//their are two cases. One is that it's the first string.
-				if(indexOfVal == 0)
-					//+2 is the comma and space.
-					inputValStr = inputValStr.substring(0, indexOfVal)
-						+ inputValStr.substring(indexOfVal + this.value.length + 2);
-				//the second is any other space, including last.
-				else
-					//the -2 is the comma and space before the value.
-					inputValStr = inputValStr.substring(0, indexOfVal-2)
-						+ inputValStr.substring(indexOfVal + this.value.length)
-	
-				selection.val(inputValStr);
-	
-				autocomplete.enable(this.value);
+			function checkboxUnchecked() {
 			};
 	
-			_init();
-		}); //end this.each
-	}; //end multiselection
-}); //end onload
+
+///////////////////////////////////////////////////
+///////////////////////////////////////////////////
+
+//selectionCallback context: this = portableAutoComplete
 
 function portableAutoComplete(options)
 {
@@ -311,16 +393,16 @@ function portableAutoComplete(options)
 			});
 			//
 
-			option.mousemove(function() { $(this).index = $(this).text(); });
+			option.mousemove(function() { self.index = $(this).text(); });
 			option.mouseout(function() { 
-				if(this.index == $(this).text()) 
-					this.index = false;
+				if(self.index == $(this).text()) 
+					self.index = false;
 			});
 		
 			option.click(function() {
-				self.options["selectionCallback"].call(window, $(this).text());
+				self.options["selectionCallback"].call(self, $(this).text());
 				//TODO: remove me and put me in a hide method.
-				autocomplete.index = false;
+				self.index = false;
 			});
 	
 			this.container.append(option);
