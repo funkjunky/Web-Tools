@@ -13,8 +13,13 @@ $(function() {
 				else
 				{
 					//grab the options. Add data to it.
+					var newOptions = $this.options;
+					newOptions["data"] = arr;
 					//call destroy.
+					this.multiSelection("destroy");
+					alert(newOptions);
 					//call init with our options with the new data.
+					this.multiSelection(newOptions);
 					//return this
 					return this;
 				}
@@ -63,7 +68,7 @@ $(function() {
 				} else
 					selection.after($this.cbContainer);
 	
-				selection.change(selectionOnChange);
+				selection.bind("change.multiSelection", selectionOnChange);
 	
 				$this.autocomplete = new portableAutoComplete({
 						  arr: $.makeArray($this["data"]), 
@@ -198,7 +203,8 @@ $(function() {
 				checkbox.attr("id", id);
 				checkbox.attr("name", name + "[]");
 				checkbox.val(value);
-				checkbox.change(function() {
+				checkbox.bind("change.multiSelection"
+				, function() {
 					if($(this).attr("checked")) {
 						var newInputStr = selection.val();
 						if($.trim(selection.val()).length > 0)
