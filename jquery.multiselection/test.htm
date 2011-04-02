@@ -8,11 +8,14 @@
  <script type="text/javascript" src="jquery.multiselection.js"></script>
  <script type="text/javascript">
  $(function() {
+	var ms = 
 	$(".multisel").multiSelection({
 			  data: ["apple", "orange", "girrafe", "coffee table"], 
 			  errorCallback: UserWarning, 
 			  hasFixInError: true
 	});
+
+	ms.each(function() { $(this).multiSelection("destroy"); });
  });
  </script>
 </head>

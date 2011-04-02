@@ -1,10 +1,10 @@
 $(function() {
 	$.fn.multiSelection = function(options) {
-		//these methods rely on having the correct this context.
+		//these methods are called using: this = $(this)
+		//so you don't need to wrap them.
 		var methods = {
-			/*
 			data: function(arr) {
-				var $this = $(this).data("multiSelection");
+				var $this = this.data("multiSelection");
 
 				if(typeof arr == "undefined")
 				{
@@ -12,12 +12,13 @@ $(function() {
 				}
 				else
 				{
-					$this.data = arr;
-					//call functions to update changes.
-					return $this;
+					//grab the options. Add data to it.
+					//call destroy.
+					//call init with our options with the new data.
+					//return this
+					return this;
 				}
 			},
-			*/
 			init: function() {
 				var $this = $(this).data("multiSelection");
 				//selection here is a quick hack, 'cause I'm too lazy
@@ -55,7 +56,7 @@ $(function() {
 				if($this.options["hasButton"])
 				{
 					selection.after($this.cbButton = _createButton());
-					$this.cbButton.click(function() {
+					$this.cbButton.bind("click.multiSelection", function() {
 						$this.cbContainer.toggle();
 					});
 					$this.cbButton.after($this.cbContainer);
@@ -74,18 +75,24 @@ $(function() {
 				});
 				$(document.body).append($this.autocomplete.container);
 	
-				selection.focus(function(){
+				selection.bind("focus.multiSelection", function(){
 					$(this).keyup();
 					$this.autocomplete.container.show();
 				});
 				
-				$this.autocomplete.container.mousemove(function() { 
+				//TODO: fix this coupled garbage!
+				$this.autocomplete.container.bind("mousemove.portableAutoComplete"
+				, function() { 
 					$this.onMenu = true;	
 				});
-				$this.autocomplete.container.mouseout(function() {	
+				//TODO: fix this coupled garbage.
+				//is this garbage really necessary? This is terribly coupled.
+				$this.autocomplete.container.bind("mouseout.portableAutoComplete"
+				, function() {	
 					$this.onMenu = false; 
 				});
-				selection.blur(function(){
+				selection.bind("blur.multiSelection"
+				, function(){
 					if(!$this.onMenu) {
 						$this.autocomplete.container.hide();
 						//TODO: this should go with a hide method that should be a member of autocomplete.
@@ -93,9 +100,9 @@ $(function() {
 					}
 				});
 	
-				selection.keydown(keydown);
+				selection.bind("keydown.multiSelection", keydown);
 	
-				selection.keyup(keyup);
+				selection.bind("keyup.multiSelection", keyup);
 			},
 			getItemByCaret: function(jdom) {
 				var startComma = getFirstCharBeforeCaret(jdom, ",");
@@ -108,6 +115,24 @@ $(function() {
 					$.trim(jdom.val().substring(startComma, endComma));
 	
 				return currentItem;
+			},
+			destroy: function() {
+				var $this = this.data("multiSelection");
+				this.unbind(".multiSelection");
+
+				$this.cbContainer.remove();
+				$this.cbContainer = 0;
+				$this.onMenu = false;
+				$this.selectionCallback = function(){};
+				
+				$this.autocomplete.destroy();
+				$this.autocomplete = 0;
+
+				$this.cbButton.remove();
+				$this.cbButton = 0;
+				$this.cbs = {};
+				data = [];
+				//I'm not sure if I should do more... for now don't bother.
 			}
 		};
 
@@ -150,10 +175,6 @@ $(function() {
 			$(this).data("multiSelection", dataObj);
 			var selection = $(this);
 			var $this = $(this).data("multiSelection");
-
-			var console = $("<div />");
-			console.css({position: "fixed", bottom: "0px", right: "0px"});
-			$(document.body).append(console);
 
 			methods.init.call(this);
 		}); //end this.each
@@ -385,7 +406,8 @@ function portableAutoComplete(options)
 			option.css("border", "dotted 1px black");
 			//more ewww hover code.
 			option.css("backgroundColor", defaultBGColor);
-			option.hover(function() {
+			option.bind("hover.portableAutoComplete"
+			, function() {
 				if($(this).css("backgroundColor") == defaultBGColor)
 					$(this).css("backgroundColor", "#AFEEEE");
 				else
@@ -393,13 +415,16 @@ function portableAutoComplete(options)
 			});
 			//
 
-			option.mousemove(function() { self.index = $(this).text(); });
-			option.mouseout(function() { 
+			option.bind("mousemove.portableAutoComplete"
+								, function() { self.index = $(this).text(); });
+			option.bind("mouseout.portableAutoComplete"
+			, function() { 
 				if(self.index == $(this).text()) 
 					self.index = false;
 			});
 		
-			option.click(function() {
+			option.bind("click.portableAutoComplete"
+			,function() {
 				self.options["selectionCallback"].call(self, $(this).text());
 				//TODO: remove me and put me in a hide method.
 				self.index = false;
@@ -544,6 +569,15 @@ function portableAutoComplete(options)
 		if(typeof this.currentChoices[this.index] == "undefined")
 			this.index = false;
 	};
+
+	this.destroy = function() {
+		this.container.remove();
+		this.container = 0;
+		this.choices = {};
+		this.available = {};
+		this.currentChoices = {};
+		this.index = false;
+	}
 
 	this._init(this.options);
 };
