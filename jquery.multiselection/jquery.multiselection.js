@@ -202,7 +202,7 @@ $(function() {
 		}); //end this.each
 	} 
 	else 
-		alert("incorrect use~!!!"); //I should use the errorCallback.
+		alert("incorrect use. No method: '"+options+"'" ); //I should use the errorCallback.
 	}; //end multiselection
 }); //end onload
 
