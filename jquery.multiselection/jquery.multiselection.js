@@ -17,7 +17,6 @@ $(function() {
 					newOptions["data"] = arr;
 					//call destroy.
 					this.multiSelection("destroy");
-					alert(newOptions);
 					//call init with our options with the new data.
 					this.multiSelection(newOptions);
 					//return this
@@ -155,7 +154,9 @@ $(function() {
 			errorCallback: alert,
 			canCancelSubmission: false,
 			autoCorrect: false,
-			hasFixInError: false
+			hasFixInError: false,
+			onAdd: function(){},
+			onRemove: function(){}
 		};
 		var onMenu = false;
 		var selectionCallback = function(){};
@@ -213,6 +214,7 @@ $(function() {
 		
 						selection.val(newInputStr);
 						$this.autocomplete.disable(this.value);
+						$this.options.onAdd.call(this);
 					}
 					else{
 						var inputValStr = selection.val();
@@ -238,6 +240,8 @@ $(function() {
 						selection.val(inputValStr);
 			
 						$this.autocomplete.enable(this.value);
+
+						$this.options.onRemove.call(this);
 					}
 				});
 				var label = $("<label for='"+id+"'>"+text+"</label>");
