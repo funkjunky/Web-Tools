@@ -3,47 +3,53 @@ else{var element=this;if(document.selection){var range=document.selection.create
 return $(element).get(0).selectionStart;}}});// Copyright 2009 Ian McKellar <http://ian.mckellar.org/>
 (function(){escape_re=/[#;&,\.\+\*~':"!\^\$\[\]\(\)=>|\/\\]/;jQuery.escape=function jQuery$escape(s){var left=s.split(escape_re,1)[0];if(left==s)return s;return left+'\\'+
 s.substr(left.length,1)+
-jQuery.escape(s.substr(left.length+1));}})();$(function(){$.fn.multiSelection=function(options){var autocomplete=0;var cbContainer=0;var cbButton=0;var cbs={};var onMenu=false;var defaults={data:[],name:$(this).attr("name"),hasButton:true,errorCallback:alert,canCancelSubmission:false,autoCorrect:false,hasFixInError:false};var options=$.extend(defaults,options);var selection=$(this);var console=$("<div />");console.css({position:"fixed",bottom:"0px",right:"0px"});$(document.body).append(console);var _init=function(){if(count(options["data"])<=0)
-options["errorCallback"].call(window,"The data provided to multiSelection contains no elements.");cbContainer=$("<div />");if($.isArray(options["data"]))
-for(var i=0;i!=options["data"].length;++i)
-cbContainer.append(_getCheckbox(options["data"][i],options["data"][i]));else
-for(var i in options["data"])
-cbContainer
-.append(_getCheckbox(i,options["data"][i]));cbContainer.hide();if(options["hasButton"])
-{cbButton=_createButton();cbButton.click(function(){cbContainer.toggle();});cbButton.after(cbContainer);}else
-selection.after(cbContainer);selection.change(selectionOnChange);autocomplete=new portableAutoComplete({arr:$.makeArray(options["data"]),css:{position:"absolute",top:selection.offset().top+selection.height()+6+"px",left:selection.offset().left+"px"},selectionCallback:selectionCallback});$(document.body).append(autocomplete.container);selection.focus(function(){selection.keyup();autocomplete.container.show();});autocomplete.container.mousemove(function(){onMenu=true;});autocomplete.container.mouseout(function(){onMenu=false;});selection.blur(function(){if(!onMenu){autocomplete.container.hide();autocomplete.index=false;}});selection.keydown(keydown);selection.keyup(keyup);};var keydown=function(e){var code=e.keyCode||e.which;if(code==38||code==40||code==9||code==13){if(code==38)
-autocomplete.indexUp();else if(code==40)
-autocomplete.indexDown();else if(code==9||code==13){if(autocomplete.index!==false)
-selectionCallback(autocomplete.index);}
-e.stopPropagation();return false;}};var keyup=function(){var item=getItemByCaret();autocomplete.update(item);};var getItemByCaret=function(){var startComma=getFirstCharBeforeCaret(selection,",");if(startComma!=0)++startComma;var endComma=getFirstCharAfterCaret(selection,",");var currentItem=$.trim(selection.val().substring(startComma,endComma));return currentItem;};var selectionCallback=function(str){var startComma=getFirstCharBeforeCaret(selection,",");var before=selection.val().substring(0,startComma);var endComma=getFirstCharAfterCaret(selection,",");var after=selection.val()
-.substring(endComma,selection.val().length);var seperator="";if(startComma!=0)
-seperator=", ";selection.val(before+seperator+str+after);autocomplete.container.hide();autocomplete.index=false;selection.change();selection.focus();};var selectionOnChange=function(){if($(autocomplete.container).is(":hidden")||!onMenu)
-{var items=$(this).val().split(",");for(var i in cbs){if(cbs[i].attr("checked")==true){cbs[i].attr("checked",false);cbs[i].change();}}
-var hasFailed=false;$(this).val("");for(var i=0;i!=items.length;++i)
-{var item=$.trim(items[i]);if(item!=""&&typeof cbs[item]=="undefined"){hasFailed=true;var message="item #"+i
-+" failed with text '"+item
-+"' which is not a valid choice.";if(options["hasFixInError"])
-message+="<br />To correct this click "
-+"<a onclick=''>here</a>.";options["errorCallback"].call(window,message);if(!options["autoCorrect"]){if(i!=0)
-$(this).val($(this).val()+", ");$(this).val($(this).val()+item);}}
-else if(item!="")
-{if(cbs[item].attr("checked")==false){cbs[item].attr("checked",true);cbs[item].change();}}}
-if(hasFailed)
-$("form:has([name="+options["name"]+"])").submit(function(){options["errorCallback"].call(window,"The submission has been canceled, because the multi selection is invalid (I need to update this to somehow state which one, or provide a link to highlight, which one, or something...)");return options["canCancelSubmission"];});}};var _getCheckbox=function(value,text){var id=value+text;var checkbox=cbs[value]=$("<input />");checkbox.attr("type","checkbox");checkbox.attr("id",id);checkbox.attr("name",options["name"]);checkbox.val(value);checkbox.change(function(){if($(this).attr("checked"))
-checkboxChecked.call(this);else
-checkboxUnchecked.call(this);});var label=$("<label for='"+id+"'>"+text+"</label>");var container=$("<div />");return container.append(checkbox).append(label);};var _createButton=function(){var button=$("<input />");button.attr("type","button");button.attr("value","=");selection.after(button);return button;};var checkboxChecked=function(){var newInputStr=selection.val();if($.trim(selection.val()).length>0)
-newInputStr+=", ";newInputStr+=this.value;selection.val(newInputStr);autocomplete.disable(this.value);};var checkboxUnchecked=function(){var inputValStr=selection.val();var indexOfVal=inputValStr.indexOf(this.value);if(indexOfVal==0)
+jQuery.escape(s.substr(left.length+1));}})();$(function(){$.fn.multiSelection=function(options){var methods={data:function(arr){var $this=this.data("multiSelection");if(typeof arr=="undefined")
+{return $this.data;}
+else
+{var newOptions=$this.options;newOptions["data"]=arr;this.multiSelection("destroy");this.multiSelection(newOptions);return this;}},init:function(){var $this=$(this).data("multiSelection");var selection=$(this);if(count($this["data"])<=0)
+$this.options["errorCallback"].call(window,"The data provided to multiSelection contains no elements.");$this.selectionCallback=getSelectionCallback(selection);$this.cbContainer=$("<div />");if($.isArray($this["data"]))
+for(var i=0;i!=$this["data"].length;++i)
+$this.cbContainer.append(_getCheckbox
+($this["data"][i],$this["data"][i],$this["cbs"],$this["options"]["name"],selection));else
+for(var i in $this["data"])
+$this.cbContainer
+.append(_getCheckbox(i,$this["data"][i],$this["cbs"],$this["options"]["name"],selection));$this.cbContainer.hide();if($this.options["hasButton"])
+{selection.after($this.cbButton=_createButton());$this.cbButton.bind("click.multiSelection",function(){$this.cbContainer.toggle();});$this.cbButton.after($this.cbContainer);}else
+selection.after($this.cbContainer);selection.bind("change.multiSelection",selectionOnChange);$this.autocomplete=new portableAutoComplete({arr:$.makeArray($this["data"]),css:{position:"absolute",top:selection.offset().top+selection.height()+6+"px",left:selection.offset().left+"px"},selectionCallback:$this.selectionCallback});$(document.body).append($this.autocomplete.container);selection.bind("focus.multiSelection",function(){$(this).keyup();$this.autocomplete.container.show();});$this.autocomplete.container.bind("mousemove.portableAutoComplete",function(){$this.onMenu=true;});$this.autocomplete.container.bind("mouseout.portableAutoComplete",function(){$this.onMenu=false;});selection.bind("blur.multiSelection",function(){if(!$this.onMenu){$this.autocomplete.container.hide();$this.autocomplete.index=false;}});selection.bind("keydown.multiSelection",keydown);selection.bind("keyup.multiSelection",keyup);},getItemByCaret:function(jdom){var startComma=getFirstCharBeforeCaret(jdom,",");if(startComma!=0)++startComma;var endComma=getFirstCharAfterCaret(jdom,",");var currentItem=$.trim(jdom.val().substring(startComma,endComma));return currentItem;},destroy:function(){var $this=this.data("multiSelection");this.unbind(".multiSelection");$this.cbContainer.remove();$this.cbContainer=0;$this.onMenu=false;$this.selectionCallback=function(){};$this.autocomplete.destroy();$this.autocomplete=0;$this.cbButton.remove();$this.cbButton=0;$this.cbs={};data=[];}};if(methods[options]){return methods[options].apply(this,Array.prototype.slice.call(arguments,1));}else if(typeof options=="object"){return this.each(function(){var defaults={data:[],name:$(this).attr("id"),hasButton:true,errorCallback:alert,canCancelSubmission:false,autoCorrect:false,hasFixInError:false,onAdd:function(){},onRemove:function(){}};var onMenu=false;var selectionCallback=function(){};var autocomplete=0;var cbContainer=0;var cbButton=0;var cbs={};var l_options=$.extend(defaults,options);var data=l_options.data;delete l_options["data"];var dataObj={data:data,options:l_options,onMenu:onMenu,autocomplete:autocomplete,cbContainer:cbContainer,cbButton:cbButton,cbs:cbs,selectionCallback:selectionCallback};$(this).data("multiSelection",dataObj);var selection=$(this);var $this=$(this).data("multiSelection");methods.init.call(this);});}
+else
+alert("incorrect use~!!!");};});function _getCheckbox(value,text,cbs,name,input){var selection=input;var $this=input.data("multiSelection");var id=value+text;var checkbox=cbs[value]=$("<input />");checkbox.attr("type","checkbox");checkbox.attr("id",id);checkbox.attr("name",name+"[]");checkbox.val(value);checkbox.bind("change.multiSelection",function(){if($(this).attr("checked")){var newInputStr=selection.val();if($.trim(selection.val()).length>0)
+newInputStr+=", ";newInputStr+=$(this).val();selection.val(newInputStr);$this.autocomplete.disable(this.value);$this.options.onAdd.call(this);}
+else{var inputValStr=selection.val();var indexOfVal=inputValStr.indexOf(this.value);if(indexOfVal==0)
 inputValStr=inputValStr.substring(0,indexOfVal)
-+inputValStr.substring(indexOfVal+this.value.length+2);else
++inputValStr.substring(indexOfVal
++this.value.length+2);else
 inputValStr=inputValStr.substring(0,indexOfVal-2)
 +inputValStr.substring(indexOfVal+this.value.length)
-selection.val(inputValStr);autocomplete.enable(this.value);};_init();};});function portableAutoComplete(options)
+selection.val(inputValStr);$this.autocomplete.enable(this.value);$this.options.onRemove.call(this);}});var label=$("<label for='"+id+"'>"+text+"</label>");var container=$("<div />");return container.append(checkbox).append(label);};function keydown(e){var $this=$(this).data("multiSelection");var code=e.keyCode||e.which;if(code==38||code==40||code==9||code==13){if(code==38)
+$this.autocomplete.indexUp();else if(code==40)
+$this.autocomplete.indexDown();else if(code==9||code==13){if($this.autocomplete.index!==false)
+$this.selectionCallback.call($this.autocomplete,$this.autocomplete.index);}
+e.stopPropagation();return false;}};function keyup(){var $this=$(this).data("multiSelection");var item=$(this).multiSelection("getItemByCaret",$(this));$this.autocomplete.update(item);};function getSelectionCallback(selection){return function(str){var startComma=getFirstCharBeforeCaret(selection,",");var before=selection.val().substring(0,startComma);var endComma=getFirstCharAfterCaret(selection,",");var after=selection.val()
+.substring(endComma,selection.val().length);var seperator="";if(startComma!=0)
+seperator=", ";selection.val(before+seperator+str+after);this.container.hide();this.index=false;selection.change();selection.focus();};};function selectionOnChange(){$this=$(this).data("multiSelection");if($($this.autocomplete.container).is(":hidden")||!$this.onMenu)
+{var items=$(this).val().split(",");for(var i in $this.cbs){if($this.cbs[i].attr("checked")==true){$this.cbs[i].attr("checked",false);$this.cbs[i].change();}}
+var hasFailed=false;$(this).val("");for(var i=0;i!=items.length;++i)
+{var item=$.trim(items[i]);if(item!=""&&typeof $this.cbs[item]=="undefined"){hasFailed=true;var message="item #"+i
++" failed with text '"+item
++"' which is not a valid choice.";if($this.options["hasFixInError"])
+message+="<br />To correct this click "
++"<a onclick=''>here</a>.";$this.options["errorCallback"].call(window,message);if(!$this.options["autoCorrect"]){if(i!=0)
+$(this).val($(this).val()+", ");$(this).val($(this).val()+item);}}
+else if(item!="")
+{if($this.cbs[item].attr("checked")==false){$this.cbs[item].attr("checked",true);$this.cbs[item].change();}}}
+if(hasFailed)
+$("form:has([name="+$this.options["name"]+"])").submit(function(){$this.options["errorCallback"].call(window,"The submission has been canceled, because the multi selection is invalid (I need to update this to somehow state which one, or provide a link to highlight, which one, or something...)");return $this.options["canCancelSubmission"];});}};function _createButton(){var button=$("<input />");button.attr("type","button");button.attr("value","=");return button;};function checkboxUnchecked(){};function portableAutoComplete(options)
 {this.options={};this.available={};this.choices={};this.currentChoices={};this.container=0;this.index=false;var defaultBGColor="rgb(255, 255, 255)";var self=this;var defaults={arr:[],css:{},selectionCallback:alert,errorCallback:alert};this.options=$.extend(defaults,options);this._init=function(options){this.container=$("<div />");this.container.css(options["css"]);for(var i=0;i!=options["arr"].length;++i)
 {var option=$("<div />");option.append(options["arr"][i]);option.hide();if(typeof this.choices[options["arr"][i]]!="undefined")
-this.options["errorCallback"].call(window,"You can not have identical choices in autocomplete.");this.choices[options["arr"][i]]=option;this.available[options["arr"][i]]=true;option.css("cursor","pointer");option.css("border","dotted 1px black");option.css("backgroundColor",defaultBGColor);option.hover(function(){if($(this).css("backgroundColor")==defaultBGColor)
+this.options["errorCallback"].call(window,"You can not have identical choices in autocomplete.");this.choices[options["arr"][i]]=option;this.available[options["arr"][i]]=true;option.css("cursor","pointer");option.css("border","dotted 1px black");option.css("backgroundColor",defaultBGColor);option.bind("hover.portableAutoComplete",function(){if($(this).css("backgroundColor")==defaultBGColor)
 $(this).css("backgroundColor","#AFEEEE");else
-$(this).css("backgroundColor",defaultBGColor);});option.mousemove(function(){$(this).index=$(this).text();});option.mouseout(function(){if(this.index==$(this).text())
-this.index=false;});option.click(function(){self.options["selectionCallback"].call(window,$(this).text());autocomplete.index=false;});this.container.append(option);}
+$(this).css("backgroundColor",defaultBGColor);});option.bind("mousemove.portableAutoComplete",function(){self.index=$(this).text();});option.bind("mouseout.portableAutoComplete",function(){if(self.index==$(this).text())
+self.index=false;});option.bind("click.portableAutoComplete",function(){self.options["selectionCallback"].call(self,$(this).text());self.index=false;});this.container.append(option);}
 this.container.hide();};this.indexUp=function(){if(objLen(this.currentChoices)<=0)
 return;var prev;for(var i in this.currentChoices){prev=i;break;}
 if(this.index===false)
@@ -69,7 +75,8 @@ choices[i]=this.choices[i];return choices;};this.update=function(str){var arrMat
 arrMatched=matchedElements(getKeys(choices),str,false);for(i in choices){choices[i].hide();}
 this.currentChoices={};for(var i=0;i!=arrMatched.length;++i){choices[arrMatched[i]].show();this.currentChoices[arrMatched[i]]=choices[arrMatched[i]];}
 if(typeof this.currentChoices[this.index]=="undefined")
-this.index=false;};this._init(this.options);};function count(obj)
+this.index=false;};this.destroy=function(){this.container.remove();this.container=0;this.choices={};this.available={};this.currentChoices={};this.index=false;}
+this._init(this.options);};function count(obj)
 {var i=0;for(j in obj)++i;return i;}
 function matchedElements(arr,val,isLoose)
 {isLoose=(typeof isLoose=="undefined"||!isLoose)?false:true;if($.isArray(arr))
