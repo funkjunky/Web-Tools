@@ -120,6 +120,22 @@ $(function() {
 	
 				return currentItem;
 			},
+			disable: function() {
+				var $this = this.data("multiSelection");
+
+				$(this).attr("readonly", true);
+				$this.cbButton.attr("readonly", true);
+				for(var i in $this.cbs)
+					$this.cbs[i].attr("readonly", true);
+			},
+			enable: function() {
+				var $this = this.data("multiSelection");
+
+				$(this).attr("readonly", false);
+				$this.cbButton.attr("readonly", false);
+				for(var i in $this.cbs)
+					$this.cbs[i].attr("readonly", false);
+			},
 			destroy: function() {
 				var $this = this.data("multiSelection");
 				this.unbind(".multiSelection");
