@@ -159,6 +159,9 @@ $(function() {
 					$this.cbs = {};
 					data = [];
 					//I'm not sure if I should do more... for now don't bother.
+
+					//destroy the data object.
+					$(this).removeData("multiSelection");
 				});
 			}
 		};
@@ -168,6 +171,13 @@ $(function() {
 	} else if(typeof options == "object") {
 
 		return this.each(function() {
+		//first, if it exists, then you may want to output a warning.
+		//then destroy it.
+			if(typeof $(this).data("multiSelection") != "undefined") {
+				alert("destroying instance of multiSelection to create a new one.");
+				$(this).multiSelection("destroy");
+			}
+
 				  //I think i can just delete seletion here.
 		var defaults =
 		{
