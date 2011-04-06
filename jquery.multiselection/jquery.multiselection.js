@@ -14,15 +14,16 @@ $(function() {
 				{
 					return this.each(function() {
 						//set $this to be the data of the single element we are on
-						$this = this.data("multiSelection");
+						$this = $(this).data("multiSelection");
 						
 						//grab the options. Add data to it.
 						var newOptions = $this.options;
 						newOptions["data"] = arr;
 						//call destroy.
-						this.multiSelection("destroy");
+						$(this).multiSelection("destroy");
+						alert(newOptions);
 						//call init with our options with the new data.
-						this.multiSelection(newOptions);
+						$(this).multiSelection(newOptions);
 					});
 				}
 			},
