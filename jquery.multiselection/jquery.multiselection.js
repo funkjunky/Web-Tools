@@ -138,7 +138,7 @@ $(function() {
 				this.attr("readonly", false);
 
 				this.each(function() {
-					var $this = this.data("multiSelection");
+					var $this = $(this).data("multiSelection");
 	
 					$this.cbButton.attr("disabled", false);
 					for(var i in $this.cbs)
