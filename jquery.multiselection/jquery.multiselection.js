@@ -124,20 +124,26 @@ $(function() {
 				return currentItem;
 			},
 			disable: function() {
-				var $this = this.data("multiSelection");
+				this.attr("readonly", true);
 
-				$(this).attr("readonly", true);
-				$this.cbButton.attr("disabled", true);
-				for(var i in $this.cbs)
-					$this.cbs[i].attr("readonly", true);
+				this.each(function() {
+					var $this = $(this).data("multiSelection");
+
+					$this.cbButton.attr("disabled", true);
+					for(var i in $this.cbs)
+						$this.cbs[i].attr("readonly", true);
+				});
 			},
 			enable: function() {
-				var $this = this.data("multiSelection");
+				this.attr("readonly", false);
 
-				$(this).attr("readonly", false);
-				$this.cbButton.attr("disabled", false);
-				for(var i in $this.cbs)
-					$this.cbs[i].attr("readonly", false);
+				this.each(function() {
+					var $this = this.data("multiSelection");
+	
+					$this.cbButton.attr("disabled", false);
+					for(var i in $this.cbs)
+						$this.cbs[i].attr("readonly", false);
+				});
 			},
 			destroy: function() {
 				//unbind all events associated with my plugin from the input.
