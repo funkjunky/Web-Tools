@@ -12,15 +12,18 @@ $(function() {
 				}
 				else
 				{
-					//grab the options. Add data to it.
-					var newOptions = $this.options;
-					newOptions["data"] = arr;
-					//call destroy.
-					this.multiSelection("destroy");
-					//call init with our options with the new data.
-					this.multiSelection(newOptions);
-					//return this
-					return this;
+					return this.each(function() {
+						//set $this to be the data of the single element we are on
+						$this = this.data("multiSelection");
+						
+						//grab the options. Add data to it.
+						var newOptions = $this.options;
+						newOptions["data"] = arr;
+						//call destroy.
+						this.multiSelection("destroy");
+						//call init with our options with the new data.
+						this.multiSelection(newOptions);
+					});
 				}
 			},
 			init: function() {
