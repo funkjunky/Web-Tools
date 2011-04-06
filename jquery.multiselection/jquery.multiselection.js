@@ -21,7 +21,6 @@ $(function() {
 						newOptions["data"] = arr;
 						//call destroy.
 						$(this).multiSelection("destroy");
-						alert(newOptions);
 						//call init with our options with the new data.
 						$(this).multiSelection(newOptions);
 					});
