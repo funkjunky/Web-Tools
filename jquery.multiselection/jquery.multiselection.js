@@ -81,6 +81,9 @@ $(function() {
 	
 				selection.bind("focus.multiSelection", function(){
 					$(this).keyup();
+					$this.autocomplete.container.css(
+						{	top: selection.offset().top+selection.height()+6+"px",
+							left: selection.offset().left+"px"});
 					$this.autocomplete.container.show();
 				});
 				
