@@ -140,22 +140,26 @@ $(function() {
 					$this.cbs[i].attr("readonly", false);
 			},
 			destroy: function() {
-				var $this = this.data("multiSelection");
+				//unbind all events associated with my plugin from the input.
 				this.unbind(".multiSelection");
 
-				$this.cbContainer.remove();
-				$this.cbContainer = 0;
-				$this.onMenu = false;
-				$this.selectionCallback = function(){};
-				
-				$this.autocomplete.destroy();
-				$this.autocomplete = 0;
+				this.each(function() {
+					var $this = $(this).data("multiSelection");
+	
+					$this.cbContainer.remove();
+					$this.cbContainer = 0;
+					$this.onMenu = false;
+					$this.selectionCallback = function(){};
+					
+					$this.autocomplete.destroy();
+					$this.autocomplete = 0;
 
-				$this.cbButton.remove();
-				$this.cbButton = 0;
-				$this.cbs = {};
-				data = [];
-				//I'm not sure if I should do more... for now don't bother.
+					$this.cbButton.remove();
+					$this.cbButton = 0;
+					$this.cbs = {};
+					data = [];
+					//I'm not sure if I should do more... for now don't bother.
+				});
 			}
 		};
 
