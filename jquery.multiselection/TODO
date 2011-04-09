@@ -1,10 +1,13 @@
 TODO:
 
+Current: bug with checkbox clicking affecting other multiselections.
+
+[BUGS]
+-sometimes the checkboxes are linked to inputs they shouldn't be... it is very strange, and inconsistant. Hard to reproduce.
+
 [auto-complete]
 -package the jquery plugin on Preney's server.
 -fix the caret needing to be after the messageGraphicsSystem
--write an email explaining how to use each plugin. If it is tricky to explain any plugin, then don't send the email and rework code to make it easy.
--make a new iteration of the plugin that updates the checkboxes on keyup
 
 [add to JS in general]
 -isset function. Or use jQueries if it exists. and replace all code that does a typeof check.
@@ -13,8 +16,8 @@ TODO:
 	-it shouldn't be attached to any DOM in the first place =x.
 
 [clean up for jQuery plugin]
+-cleaning up the basics of the entire plugin.
 -rewrite the maintenance on the autocomplete... adding and removing things and stuff is messy. Write functions to wrap doing those things, so it's one call.
--remove all global functions, and put them into the plugin itsself.
 -add warningCallback, and NotifyCallback as callback options, and if one is missing, just use the value supplied to the not missing ones. error = (warning > notify), warning = (notify > warning), notify = (warning > error).
 -add the ability to call UserWarning, Error, etc. using a dom element instead of text. if it is a string, then insert as .text, otherwise use .html or if that doesn't work, use .append, but I want to erase anything inside it before attaching, hence not .append.
 

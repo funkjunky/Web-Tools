@@ -24,93 +24,11 @@ $(function() {
 					});
 				}
 			},
-			init: function() {
+			validateData: function (){
 				var $this = $(this).data("multiSelection");
-				//selection here is a quick hack, 'cause I'm too lazy
-				//to remove selection. I should remove this at some point.
-				var selection = $(this);
-
 				if(count($this["data"]) <= 0)
 					$this.options["errorCallback"].call(window,
-					 "The data provided to multiSelection contains no elements.");
-				//get the selectionCallback
-				$this.selectionCallback = getSelectionCallback(selection);
-
-				//create the div that contains the checkboxes.
-				$this.cbContainer = $("<div />");
-				//for each datum, create a label and checkbox and append it
-				//If data is an array, then use the value for the value as well.
-				if($.isArray($this["data"]))
-					for(var i=0; i!=$this["data"].length; ++i)
-						$this.cbContainer.append(
-							_getCheckbox
-								($this["data"][i], $this["data"][i]
-									, $this["cbs"], $this["options"]["name"]
-									, selection));
-				//If the data is associative, then use the key as the value.
-				else
-					for(var i in $this["data"])
-						$this.cbContainer
-							.append(
-								_getCheckbox(i, $this["data"][i]
-									, $this["cbs"], $this["options"]["name"]
-									, selection));
-	
-				$this.cbContainer.hide();
-	
-				if($this.options["hasButton"])
-				{
-					selection.after($this.cbButton = _createButton());
-					$this.cbButton.bind("click.multiSelection", function() {
-						$this.cbContainer.toggle();
-					});
-					$this.cbButton.after($this.cbContainer);
-				} else
-					selection.after($this.cbContainer);
-	
-				selection.bind("change.multiSelection", selectionOnChange);
-	
-				$this.autocomplete = new portableAutoComplete({
-						  arr: $.makeArray($this["data"]), 
-						  css: {
-						  	position: "absolute", 
-						  	top: selection.offset().top+selection.height()+6+"px",
-						  	left: selection.offset().left+"px" },
-						  selectionCallback: $this.selectionCallback
-				});
-				$(document.body).append($this.autocomplete.container);
-	
-				selection.bind("focus.multiSelection", function(){
-					$(this).keyup();
-					$this.autocomplete.container.css(
-						{	top: selection.offset().top+selection.height()+6+"px",
-							left: selection.offset().left+"px"});
-					$this.autocomplete.container.show();
-				});
-				
-				//TODO: fix this coupled garbage!
-				$this.autocomplete.container.bind("mousemove.portableAutoComplete"
-				, function() { 
-					$this.onMenu = true;	
-				});
-				//TODO: fix this coupled garbage.
-				//is this garbage really necessary? This is terribly coupled.
-				$this.autocomplete.container.bind("mouseout.portableAutoComplete"
-				, function() {	
-					$this.onMenu = false; 
-				});
-				selection.bind("blur.multiSelection"
-				, function(){
-					if(!$this.onMenu) {
-						$this.autocomplete.container.hide();
-						//TODO: this should go with a hide method that should be a member of autocomplete.
-						$this.autocomplete.index = false;
-					}
-				});
-	
-				selection.bind("keydown.multiSelection", keydown);
-	
-				selection.bind("keyup.multiSelection", keyup);
+					"The data provided to multiSelection contains no elements.");
 			},
 			getItemByCaret: function(jdom) {
 				var startComma = getFirstCharBeforeCaret(jdom, ",");
@@ -177,6 +95,7 @@ $(function() {
 		return methods[options].apply(this, Array.prototype.slice.call(arguments, 1));
 	} else if(typeof options == "object") {
 
+		var options_access = options;
 		return this.each(function() {
 			var defaults =
 			{
@@ -190,7 +109,7 @@ $(function() {
 				onAdd: function(){},
 				onRemove: function(){}
 			};
-			var l_options = $.extend(defaults, options);
+			var l_options = $.extend(defaults, options_access);
 
 			//first, if it exists, then you may want to output a warning.
 			//then destroy it.
@@ -198,29 +117,7 @@ $(function() {
 				alert("destroying instance of multiSelection to create a new one.");
 				$(this).multiSelection("destroy");
 			}
-
-		var onMenu = false;
-		var selectionCallback = function(){};
-		var autocomplete = 0;
-		var cbContainer = 0;
-		var cbButton = 0;
-		var cbs = {};
-		var data = l_options.data; delete l_options["data"];
-		var dataObj = {
-				  data: data, 
-				  options: l_options,
-				  
-				  onMenu: onMenu, 
-				  autocomplete: autocomplete,
-				  cbContainer: cbContainer,
-				  cbButton: cbButton,
-				  cbs: cbs,
-				  selectionCallback: selectionCallback
-		};
-
-			$(this).data("multiSelection", dataObj);
-
-			methods.init.call(this);
+			_init($(this), l_options);
 		}); //end this.each
 	} 
 	else 
@@ -233,6 +130,138 @@ $(function() {
 	
 			function _init(self, options)
 			{
+				_init_optionsAndData(self, options);
+
+				self.multiSelection("validateData");
+				_init_autocomplete(self);
+				_init_inputSetup(self);
+				_init_checkboxSetup(self);
+				_init_buttonSetup(self);
+			}
+
+			function _init_buttonSetup(self)
+			{
+				var $this = self.data("multiSelection");
+
+				if($this.options["hasButton"])
+				{
+					self.after($this.cbButton = _createButton());
+					$this.cbButton.bind("click.multiSelection", function() {
+						$this.cbContainer.toggle();
+					});
+					$this.cbButton.after($this.cbContainer);
+				} else
+					self.after($this.cbContainer);
+			}
+
+			function _init_checkboxSetup(self)
+			{
+				var $this = self.data("multiSelection");
+
+				//create the div that contains the checkboxes.
+				$this.cbContainer = $("<div />");
+				//for each datum, create a label and checkbox and append it
+				//If data is an array, then use the value for the value as well.
+				if($.isArray($this["data"]))
+					for(var i=0; i!=$this["data"].length; ++i)
+						$this.cbContainer.append(
+							_getCheckbox
+								($this["data"][i], $this["data"][i]
+									, $this["cbs"], $this["options"]["name"]
+									, self));
+				//If the data is associative, then use the key as the value.
+				else
+					for(var i in $this["data"])
+						$this.cbContainer
+							.append(
+								_getCheckbox(i, $this["data"][i]
+									, $this["cbs"], $this["options"]["name"]
+									, self));
+	
+				$this.cbContainer.hide();
+			}
+
+			function _init_inputSetup(self)
+			{				
+				var $this = self.data("multiSelection");
+	
+				self.bind("change.multiSelection", selectionOnChange);
+	
+				self.bind("focus.multiSelection", function(){
+					$(this).keyup();
+					$this.autocomplete.container.css(
+						{	top: self.offset().top+self.height()+6+"px",
+							left: self.offset().left+"px"});
+					$this.autocomplete.container.show();
+				});
+
+				self.bind("blur.multiSelection"
+				, function(){
+					if(!$this.onMenu) {
+						$this.autocomplete.container.hide();
+						//TODO: this should go with a hide method that should be a member of autocomplete.
+						$this.autocomplete.index = false;
+					}
+				});
+	
+				self.bind("keydown.multiSelection", keydown);
+	
+				self.bind("keyup.multiSelection", keyup);
+			}
+
+			function _init_autocomplete(self)
+			{
+				var $this = self.data("multiSelection");
+
+				$this.selectionCallback = getSelectionCallback(self);
+
+				$this.autocomplete = new portableAutoComplete({
+						  arr: $.makeArray($this["data"]), 
+						  css: {
+						  	position: "absolute", 
+						  	top: self.offset().top+self.height()+6+"px",
+						  	left: self.offset().left+"px" },
+						  selectionCallback: $this.selectionCallback
+				});
+				
+				//TODO: fix this coupled garbage!
+				$this.autocomplete.container.bind("mousemove.portableAutoComplete"
+				, function() { 
+					$this.onMenu = true;	
+				});
+				//TODO: fix this coupled garbage.
+				//is this garbage really necessary? This is terribly coupled.
+				$this.autocomplete.container.bind("mouseout.portableAutoComplete"
+				, function() {	
+					$this.onMenu = false; 
+				});
+
+				$(document.body).append($this.autocomplete.container);
+			}
+
+			function _init_optionsAndData(self, options)
+			{
+				var onMenu = false;
+				var selectionCallback = function(){};
+				var autocomplete = 0;
+				var cbContainer = 0;
+				var cbButton = 0;
+				var cbs = {};
+				var data = options.data;
+				delete options["data"];
+
+				var dataObj = {
+				  data: data, 
+				  options: options,
+				  
+				  onMenu: onMenu, 
+				  autocomplete: autocomplete,
+				  cbContainer: cbContainer,
+				  cbButton: cbButton,
+				  cbs: cbs,
+				  selectionCallback: selectionCallback
+				};
+				self.data("multiSelection", dataObj);
 			}
 
 			function _getCheckbox(value, text, cbs, name, input) {
@@ -458,11 +487,12 @@ function portableAutoComplete(options)
 			option.css("border", "dotted 1px black");
 			//more ewww hover code.
 			option.css("backgroundColor", defaultBGColor);
-			option.bind("hover.portableAutoComplete"
+			option.bind("mouseenter.portableAutoComplete"
 			, function() {
-				if($(this).css("backgroundColor") == defaultBGColor)
 					$(this).css("backgroundColor", "#AFEEEE");
-				else
+			});
+			option.bind("mouseleave.portableAutoComplete"
+			, function() {
 					$(this).css("backgroundColor", defaultBGColor);
 			});
 			//
