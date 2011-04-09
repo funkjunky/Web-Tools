@@ -4,17 +4,15 @@ $(function() {
 		//so you don't need to wrap them.
 		var methods = {
 			data: function(arr) {
-				var $this = this.data("multiSelection");
-
 				if(typeof arr == "undefined")
 				{
-					return $this.data;
+					return this.data("multiSelection").data;
 				}
 				else
 				{
 					return this.each(function() {
 						//set $this to be the data of the single element we are on
-						$this = $(this).data("multiSelection");
+						var $this = $(this).data("multiSelection");
 						
 						//grab the options. Add data to it.
 						var newOptions = $this.options;
@@ -180,33 +178,33 @@ $(function() {
 	} else if(typeof options == "object") {
 
 		return this.each(function() {
-		//first, if it exists, then you may want to output a warning.
-		//then destroy it.
+			var defaults =
+			{
+				data: [],
+				name: $(this).attr("id"),
+				hasButton: true,
+				errorCallback: alert,
+				canCancelSubmission: false,
+				autoCorrect: false,
+				hasFixInError: false,
+				onAdd: function(){},
+				onRemove: function(){}
+			};
+			var l_options = $.extend(defaults, options);
+
+			//first, if it exists, then you may want to output a warning.
+			//then destroy it.
 			if(typeof $(this).data("multiSelection") != "undefined") {
 				alert("destroying instance of multiSelection to create a new one.");
 				$(this).multiSelection("destroy");
 			}
 
-				  //I think i can just delete seletion here.
-		var defaults =
-		{
-			data: [],
-			name: $(this).attr("id"),
-			hasButton: true,
-			errorCallback: alert,
-			canCancelSubmission: false,
-			autoCorrect: false,
-			hasFixInError: false,
-			onAdd: function(){},
-			onRemove: function(){}
-		};
 		var onMenu = false;
 		var selectionCallback = function(){};
 		var autocomplete = 0;
 		var cbContainer = 0;
 		var cbButton = 0;
 		var cbs = {};
-		var l_options = $.extend(defaults, options);
 		var data = l_options.data; delete l_options["data"];
 		var dataObj = {
 				  data: data, 
@@ -221,8 +219,6 @@ $(function() {
 		};
 
 			$(this).data("multiSelection", dataObj);
-			var selection = $(this);
-			var $this = $(this).data("multiSelection");
 
 			methods.init.call(this);
 		}); //end this.each
@@ -235,6 +231,10 @@ $(function() {
 ////////multiSelection class methods///////////////
 ///////////////////////////////////////////////////
 	
+			function _init(self, options)
+			{
+			}
+
 			function _getCheckbox(value, text, cbs, name, input) {
 				//omg eww... $this is generally bad but necessary.
 				//selection is me being lazy.
