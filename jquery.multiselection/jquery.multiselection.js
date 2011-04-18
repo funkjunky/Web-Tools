@@ -97,9 +97,16 @@ $(function() {
 
 		var options_access = options;
 		return this.each(function() {
+			var data;
+			if(typeof $(this).data("data") !== "undefined"
+								&& $.isArray($(this).data("data")))
+				data = $(this).data("data");
+			else
+				data = [];
+
 			var defaults =
 			{
-				data: [],
+				data: data,
 				name: $(this).attr("id"),
 				hasButton: true,
 				errorCallback: alert,

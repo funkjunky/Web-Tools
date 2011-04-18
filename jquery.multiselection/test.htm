@@ -24,6 +24,8 @@
 
 	$("#fruit3").multiSelection("disable");
 
+	$("#bulletMS").multiSelection({errorCallback: UserWarning});
+
 	$("#fruit").before("<br />");
 	$("#fruit").before("<br />");
 	$("#fruit").before("<br />");
@@ -38,6 +40,8 @@
 <form>
 <br />
 <br />
+<input type="text" id="bulletMS" id="bullets" autocomplete="off"
+			data-data='["bill", "chainchomp", "doug?", "12gauge"]' /><br />
 <br />
 <br />
 <br />
