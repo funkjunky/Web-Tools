@@ -26,6 +26,12 @@
 
 	$("#bulletMS").multiSelection({errorCallback: UserWarning});
 
+	$("#gamesMS").multiSelection({
+			  	data: ["SSB", 'SMB', "SMB2", "SMB3", "lost vikings", "MGS",
+			  			"yoshi?"],
+				errorCallback: UserWarning});
+	$("#gamesMS").multiSelection("select", $("#gamesMS").data("select"));
+
 	$("#fruit").before("<br />");
 	$("#fruit").before("<br />");
 	$("#fruit").before("<br />");
@@ -38,9 +44,11 @@
 </head>
 <body>
 <form>
+<input type="text" id="gamesMS" autocomplete="off"
+			data-select='["SMB", "SMB3", "SSB", "lost vikings"]' /><br />
 <br />
 <br />
-<input type="text" id="bulletMS" id="bullets" autocomplete="off"
+<input type="text" id="bulletMS" autocomplete="off"
 			data-data='["bill", "chainchomp", "doug?", "12gauge"]' /><br />
 <br />
 <br />

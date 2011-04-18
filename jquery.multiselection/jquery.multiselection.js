@@ -3,6 +3,17 @@ $(function() {
 		//these methods are called using: this = $(this)
 		//so you don't need to wrap them.
 		var methods = {
+			select: function(mixed) {
+				return this.each(function() {
+					var $this = $(this).data("multiSelection");
+					//if the data is not an array, then turn it into one.
+					if(!$.isArray(mixed)) 	
+						mixed = [mixed];
+	
+					//call the onchange of the input, but passing out own data.
+					$(this).trigger("change", [mixed]);
+				});
+			},
 			data: function(arr) {
 				if(typeof arr == "undefined")
 				{
@@ -378,14 +389,19 @@ $(function() {
 				};
 			};
 	
-			function selectionOnChange() {
+			function selectionOnChange(event, selections) {
+				alert(selections);
 				$this = $(this).data("multiSelection");
 
 				if($($this.autocomplete.container).is(":hidden") 
 						  || !$this.onMenu)
 				{
-					//explode on comma
-					var items = $(this).val().split(",");
+					var items;
+					if(typeof selections === "undefined")
+						//explode on comma
+						items = $(this).val().split(",");
+					else
+						items = selections;
 	
 					//clear checkboxes (their may be a more effecient way)
 					for(var i in $this.cbs) { 
