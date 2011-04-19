@@ -390,18 +390,15 @@ $(function() {
 			};
 	
 			function selectionOnChange(event, selections) {
-				alert(selections);
 				$this = $(this).data("multiSelection");
 
 				if($($this.autocomplete.container).is(":hidden") 
 						  || !$this.onMenu)
 				{
-					var items;
-					if(typeof selections === "undefined")
-						//explode on comma
-						items = $(this).val().split(",");
-					else
-						items = selections;
+					//explode on comma
+					var items = $(this).val().split(",");
+					if(typeof selections !== "undefined")
+						items = array_unique($.merge(items, selections));
 	
 					//clear checkboxes (their may be a more effecient way)
 					for(var i in $this.cbs) { 
@@ -866,3 +863,17 @@ function getFirstCharAfterCaret(jobj, char)
 }
 
 function objLen(obj) { var c = 0; for(var i in obj) ++c; return c;}
+
+//destructive.
+function array_unique(arr) {
+	var obj = {};
+	for(var i=0; i!=arr.length; ++i)
+		obj[arr[i]] = true;
+	
+	var ret = [];
+	$.each(obj, function(k, v) {
+		ret.push(k);
+	});
+
+	return ret;
+}
