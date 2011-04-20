@@ -50,10 +50,13 @@ $this.selectionCallback.call($this.autocomplete,$this.autocomplete.index);}
 e.stopPropagation();return false;}};function keyup(){var $this=$(this).data("multiSelection");var item=$(this).multiSelection("getItemByCaret",$(this));$this.autocomplete.update(item);};function getSelectionCallback(selection){return function(str){var startComma=getFirstCharBeforeCaret(selection,",");var before=selection.val().substring(0,startComma);var endComma=getFirstCharAfterCaret(selection,",");var after=selection.val()
 .substring(endComma,selection.val().length);var seperator="";if(startComma!=0)
 seperator=", ";selection.val(before+seperator+str+after);this.container.hide();this.index=false;selection.change();selection.focus();};};function selectionOnChange(event,selections){$this=$(this).data("multiSelection");if($($this.autocomplete.container).is(":hidden")||!$this.onMenu)
-{var items=$(this).val().split(",");if(typeof selections!=="undefined")
-items=array_unique($.merge(items,selections));for(var i in $this.cbs){if($this.cbs[i].attr("checked")==true){$this.cbs[i].attr("checked",false);$this.cbs[i].change();}}
+{var items;if($.trim($(this).val())=="")
+items=[];else
+items=$(this).val().split(",");for(var i=0;i!=items.length;++i)
+items[i]=$.trim(items[i]);if(typeof selections!=="undefined")
+items=array_unique($.merge(items,selections));alert(items);for(var i in $this.cbs){if($this.cbs[i].attr("checked")==true){$this.cbs[i].attr("checked",false);$this.cbs[i].change();}}
 var hasFailed=false;$(this).val("");for(var i=0;i!=items.length;++i)
-{var item=$.trim(items[i]);if(item!=""&&typeof $this.cbs[item]=="undefined"){hasFailed=true;var message="item #"+i
+{if(item!=""&&typeof $this.cbs[item]=="undefined"){hasFailed=true;var message="item #"+i
 +" failed with text '"+item
 +"' which is not a valid choice.";if($this.options["hasFixInError"])
 message+="<br />To correct this click "
@@ -146,4 +149,5 @@ function getFirstCharAfterCaret(jobj,char)
 {var val=jobj.val();var caretPos=jobj.caret();var endComma=val.indexOf(",",caretPos);if(endComma==-1)endComma=val.length;return endComma;}
 function objLen(obj){var c=0;for(var i in obj)++c;return c;}
 function array_unique(arr){var obj={};for(var i=0;i!=arr.length;++i)
-obj[arr[i]]=true;var ret=[];$.each(obj,function(k,v){ret.push(k);});return ret;}
+obj[arr[i]]=true;var str="";for(i in obj)
+str+=i+"\n";alert(str);var ret=[];$.each(obj,function(k,v){ret.push(k);});return ret;}
