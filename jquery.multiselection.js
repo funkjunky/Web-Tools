@@ -10,9 +10,9 @@ else
 {return this.each(function(){var $this=$(this).data("multiSelection");var newOptions=$this.options;newOptions["data"]=arr;$(this).multiSelection("destroy");$(this).multiSelection(newOptions);});}},validateData:function(){var $this=$(this).data("multiSelection");if(count($this["data"])<=0)
 $this.options["errorCallback"].call(window,"The data provided to multiSelection contains no elements.");},getItemByCaret:function(jdom){var startComma=getFirstCharBeforeCaret(jdom,",");if(startComma!=0)++startComma;var endComma=getFirstCharAfterCaret(jdom,",");var currentItem=$.trim(jdom.val().substring(startComma,endComma));return currentItem;},disable:function(){this.attr("readonly",true);this.each(function(){var $this=$(this).data("multiSelection");$this.cbButton.attr("disabled",true);for(var i in $this.cbs)
 $this.cbs[i].attr("readonly",true);});},enable:function(){this.attr("readonly",false);this.each(function(){var $this=$(this).data("multiSelection");$this.cbButton.attr("disabled",false);for(var i in $this.cbs)
-$this.cbs[i].attr("readonly",false);});},destroy:function(){this.unbind(".multiSelection");this.each(function(){var $this=$(this).data("multiSelection");$this.cbContainer.remove();$this.cbContainer=0;$this.onMenu=false;$this.selectionCallback=function(){};$this.autocomplete.destroy();$this.autocomplete=0;$this.cbButton.remove();$this.cbButton=0;$this.cbs={};data=[];$(this).removeData("multiSelection");});}};if(methods[options]){return methods[options].apply(this,Array.prototype.slice.call(arguments,1));}else if(typeof options=="object"){var options_access=options;return this.each(function(){var data;if(typeof $(this).data("data")!=="undefined"&&$.isArray($(this).data("data")))
+$this.cbs[i].attr("readonly",false);});},destroy:function(){this.unbind(".multiSelection");this.each(function(){var $this=$(this).data("multiSelection");$this.cbContainer.remove();$this.cbContainer=0;$this.onMenu=false;$this.selectionCallback=function(){};$this.autocomplete.destroy();$this.autocomplete=0;$this.cbButton.remove();$this.cbButton=0;$this.cbs={};data=[];$(this).removeData("multiSelection");});}};if(typeof $(this).data("multiSelection")!="undefined"&&methods[options]){return methods[options].apply(this,Array.prototype.slice.call(arguments,1));}else if(typeof options=="object"){var options_access=options;return this.each(function(){var data;if(typeof $(this).data("data")!=="undefined"&&$.isArray($(this).data("data")))
 data=$(this).data("data");else
-data=[];var defaults={data:data,name:$(this).attr("id"),hasButton:true,errorCallback:alert,canCancelSubmission:false,autoCorrect:false,hasFixInError:false,onAdd:function(){},onRemove:function(){}};var l_options=$.extend(defaults,options_access);if(typeof $(this).data("multiSelection")!="undefined"){alert("destroying instance of multiSelection to create a new one.");$(this).multiSelection("destroy");}
+data=[];var defaults={data:data,name:$(this).attr("id"),hasButton:true,errorCallback:alert,canCancelSubmission:false,autoCorrect:false,hasFixInError:false,onAdd:function(){},onRemove:function(){},onChange:function(){}};var l_options=$.extend(defaults,options_access);if(typeof $(this).data("multiSelection")!="undefined"){alert("destroying instance of multiSelection to create a new one.");$(this).multiSelection("destroy");}
 _init($(this),l_options);});}
 else
 alert("incorrect use. No method: '"+options+"'");};});function _init(self,options)
@@ -35,15 +35,9 @@ function _init_autocomplete(self)
 {var $this=self.data("multiSelection");$this.selectionCallback=getSelectionCallback(self);$this.autocomplete=new portableAutoComplete({arr:$.makeArray($this["data"]),css:{position:"absolute",top:self.offset().top+self.height()+6+"px",left:self.offset().left+"px"},selectionCallback:$this.selectionCallback});$this.autocomplete.container.bind("mousemove.portableAutoComplete",function(){$this.onMenu=true;});$this.autocomplete.container.bind("mouseout.portableAutoComplete",function(){$this.onMenu=false;});$(document.body).append($this.autocomplete.container);}
 function _init_optionsAndData(self,options)
 {var onMenu=false;var selectionCallback=function(){};var autocomplete=0;var cbContainer=0;var cbButton=0;var cbs={};var data=options.data;delete options["data"];var dataObj={data:data,options:options,onMenu:onMenu,autocomplete:autocomplete,cbContainer:cbContainer,cbButton:cbButton,cbs:cbs,selectionCallback:selectionCallback};self.data("multiSelection",dataObj);}
-function _getCheckbox(value,text,cbs,name,input){var selection=input;var $this=input.data("multiSelection");var id=value+text;var checkbox=cbs[value]=$("<input />");checkbox.attr("type","checkbox");checkbox.attr("id",id);checkbox.attr("name",name+"[]");checkbox.val(value);checkbox.bind("change.multiSelection",function(){if($(this).attr("checked")){var newInputStr=selection.val();if($.trim(selection.val()).length>0)
-newInputStr+=", ";newInputStr+=$(this).val();selection.val(newInputStr);$this.autocomplete.disable(this.value);$this.options.onAdd.call(this);}
-else{var inputValStr=selection.val();var indexOfVal=inputValStr.indexOf(this.value);if(indexOfVal==0)
-inputValStr=inputValStr.substring(0,indexOfVal)
-+inputValStr.substring(indexOfVal
-+this.value.length+2);else
-inputValStr=inputValStr.substring(0,indexOfVal-2)
-+inputValStr.substring(indexOfVal+this.value.length)
-selection.val(inputValStr);$this.autocomplete.enable(this.value);$this.options.onRemove.call(this);}});var label=$("<label for='"+id+"'>"+text+"</label>");var container=$("<div />");return container.append(checkbox).append(label);};function keydown(e){var $this=$(this).data("multiSelection");var code=e.keyCode||e.which;if(code==38||code==40||code==9||code==13){if(code==38)
+function _getCheckbox(value,text,cbs,name,input){var selection=input;var $this=input.data("multiSelection");var id=value+text;var checkbox=cbs[value]=$("<input />");checkbox.attr("type","checkbox");checkbox.attr("id",id);checkbox.attr("name",name+"[]");checkbox.val(value);checkbox.bind("change.multiSelection",function(){ms_checkbox_change.call(this,selection);var realItems=[];for(var i in $this.cbs)
+if($this.cbs[i].attr("checked")==true)
+realItems.push(i);$this.options["onChange"].call(this,realItems);});var label=$("<label for='"+id+"'>"+text+"</label>");var container=$("<div />");return container.append(checkbox).append(label);};function keydown(e){var $this=$(this).data("multiSelection");var code=e.keyCode||e.which;if(code==38||code==40||code==9||code==13){if(code==38)
 $this.autocomplete.indexUp();else if(code==40)
 $this.autocomplete.indexDown();else if(code==9||code==13){if($this.autocomplete.index!==false)
 $this.selectionCallback.call($this.autocomplete,$this.autocomplete.index);}
@@ -54,18 +48,15 @@ seperator=", ";selection.val(before+seperator+str+after);this.container.hide();t
 items=[];else
 items=$(this).val().split(",");for(var i=0;i!=items.length;++i)
 items[i]=$.trim(items[i]);if(typeof selections!=="undefined")
-items=array_unique($.merge(items,selections));alert(items);for(var i in $this.cbs){if($this.cbs[i].attr("checked")==true){$this.cbs[i].attr("checked",false);$this.cbs[i].change();}}
-var hasFailed=false;$(this).val("");for(var i=0;i!=items.length;++i)
-{if(item!=""&&typeof $this.cbs[item]=="undefined"){hasFailed=true;var message="item #"+i
-+" failed with text '"+item
-+"' which is not a valid choice.";if($this.options["hasFixInError"])
-message+="<br />To correct this click "
-+"<a onclick=''>here</a>.";$this.options["errorCallback"].call(window,message);if(!$this.options["autoCorrect"]){if(i!=0)
+items=array_unique($.merge(items,selections));var hasFailed=false;$(this).val("");var realItems=[];for(var i in $this.cbs)
+{var item=i;if(items.indexOf(i)!==-1){realItems.push(item);if($this.cbs[item].attr("checked")==false){$this.cbs[item].attr("checked",true);ms_checkbox_change.call($this.cbs[item].get(0),$(this));}
+else{if($.trim($(this).val()).length>0)
 $(this).val($(this).val()+", ");$(this).val($(this).val()+item);}}
-else if(item!="")
-{if($this.cbs[item].attr("checked")==false){$this.cbs[item].attr("checked",true);$this.cbs[item].change();}}}
+else if($this.cbs[item].attr("checked")==true){if($.trim($(this).val()).length>0)
+$(this).val($(this).val()+", ");$(this).val($(this).val()+item);$this.cbs[item].attr("checked",false);ms_checkbox_change.call($this.cbs[item].get(0),$(this));}}
 if(hasFailed)
-$("form:has([name="+$this.options["name"]+"])").submit(function(){$this.options["errorCallback"].call(window,"The submission has been canceled, because the multi selection is invalid (I need to update this to somehow state which one, or provide a link to highlight, which one, or something...)");return $this.options["canCancelSubmission"];});}};function _createButton(){var button=$("<input />");button.attr("type","button");button.attr("value","=");return button;};function checkboxUnchecked(){};function portableAutoComplete(options)
+$("form:has([name="+$this.options["name"]+"])").submit(function(){$this.options["errorCallback"].call(window,"The submission has been canceled, because the multi selection is invalid (I need to update this to somehow state which one, or provide a link to highlight, which one, or something...)");return $this.options["canCancelSubmission"];});}
+$this.options["onChange"].call(this,realItems);};function _createButton(){var button=$("<input />");button.attr("type","button");button.attr("value","=");return button;};function checkboxUnchecked(){};function portableAutoComplete(options)
 {this.options={};this.available={};this.choices={};this.currentChoices={};this.container=0;this.index=false;var defaultBGColor="rgb(255, 255, 255)";var self=this;var defaults={arr:[],css:{},selectionCallback:alert,errorCallback:alert};this.options=$.extend(defaults,options);this._init=function(options){this.container=$("<div />");this.container.css(options["css"]);for(var i=0;i!=options["arr"].length;++i)
 {var option=$("<div />");option.append(options["arr"][i]);option.hide();if(typeof this.choices[options["arr"][i]]!="undefined")
 this.options["errorCallback"].call(window,"You can not have identical choices in autocomplete.");this.choices[options["arr"][i]]=option;this.available[options["arr"][i]]=true;option.css("cursor","pointer");option.css("border","dotted 1px black");option.css("backgroundColor",defaultBGColor);option.bind("mouseenter.portableAutoComplete",function(){$(this).css("backgroundColor","#AFEEEE");});option.bind("mouseleave.portableAutoComplete",function(){$(this).css("backgroundColor",defaultBGColor);});option.bind("mousemove.portableAutoComplete",function(){self.index=$(this).text();});option.bind("mouseout.portableAutoComplete",function(){if(self.index==$(this).text())
@@ -149,5 +140,13 @@ function getFirstCharAfterCaret(jobj,char)
 {var val=jobj.val();var caretPos=jobj.caret();var endComma=val.indexOf(",",caretPos);if(endComma==-1)endComma=val.length;return endComma;}
 function objLen(obj){var c=0;for(var i in obj)++c;return c;}
 function array_unique(arr){var obj={};for(var i=0;i!=arr.length;++i)
-obj[arr[i]]=true;var str="";for(i in obj)
-str+=i+"\n";alert(str);var ret=[];$.each(obj,function(k,v){ret.push(k);});return ret;}
+obj[arr[i]]=true;var ret=[];$.each(obj,function(k,v){ret.push(k);});return ret;}
+function ms_checkbox_change(selection){var $this=selection.data("multiSelection");if($(this).attr("checked")){var newInputStr=selection.val();if($.trim(selection.val()).length>0)
+newInputStr+=", ";newInputStr+=$(this).val();selection.val(newInputStr);$this.autocomplete.disable(this.value);$this.options.onAdd.call(this);}
+else{var inputValStr=selection.val();var indexOfVal=inputValStr.indexOf(this.value);if(indexOfVal==0)
+inputValStr=inputValStr.substring(0,indexOfVal)
++inputValStr.substring(indexOfVal
++this.value.length+2);else
+inputValStr=inputValStr.substring(0,indexOfVal-2)
++inputValStr.substring(indexOfVal+this.value.length)
+selection.val(inputValStr);$this.autocomplete.enable(this.value);$this.options.onRemove.call(this);}}
