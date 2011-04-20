@@ -148,6 +148,11 @@ $(function() {
 				$(this).multiSelection("destroy");
 			}
 			_init($(this), l_options);
+
+			if(typeof $(this).data("select") !== "undefined"
+								&& $.isArray($(this).data("select")))
+				$(this).multiSelection("select", $(this).data("select"));
+
 		}); //end this.each
 	} 
 	else 
