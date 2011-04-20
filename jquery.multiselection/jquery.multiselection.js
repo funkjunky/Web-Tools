@@ -15,7 +15,7 @@ $(function() {
 				});
 			},
 			data: function(arr) {
-					  alert("I was called!!");
+					  alert($(this).attr("id")+" - new data:\n"+arr);
 				if(typeof arr == "undefined")
 				{
 					return this.data("multiSelection").data;
@@ -406,7 +406,6 @@ $(function() {
 
 					if(typeof selections !== "undefined")
 						items = array_unique($.merge(items, selections));
-						alert(items);
 	
 					//clear checkboxes (their may be a more effecient way)
 					for(var i in $this.cbs) { 
@@ -878,13 +877,6 @@ function array_unique(arr) {
 	for(var i=0; i!=arr.length; ++i)
 		obj[arr[i]] = true;
 
-///
-var str = "";
-for(i in obj)
-	str += i + "\n";
-alert(str);
-///
-	
 	var ret = [];
 	$.each(obj, function(k, v) {
 		ret.push(k);
