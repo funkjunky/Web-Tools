@@ -395,10 +395,17 @@ $(function() {
 				if($($this.autocomplete.container).is(":hidden") 
 						  || !$this.onMenu)
 				{
-					//explode on comma
-					var items = $(this).val().split(",");
+					var items;
+					if($.trim($(this).val()) == "")
+						items = [];
+					else	//explode on comma
+						items = $(this).val().split(",");
+					for(var i=0; i!=items.length; ++i)
+						items[i] = $.trim(items[i]);
+
 					if(typeof selections !== "undefined")
 						items = array_unique($.merge(items, selections));
+						alert(items);
 	
 					//clear checkboxes (their may be a more effecient way)
 					for(var i in $this.cbs) { 
@@ -414,7 +421,6 @@ $(function() {
 					$(this).val("");
 					for(var i=0; i != items.length; ++i)
 					{
-						var item = $.trim(items[i]);
 						if(item != "" && typeof $this.cbs[item] == "undefined") {
 							hasFailed = true;
 							var message = "item #" + i 
@@ -869,6 +875,13 @@ function array_unique(arr) {
 	var obj = {};
 	for(var i=0; i!=arr.length; ++i)
 		obj[arr[i]] = true;
+
+///
+var str = "";
+for(i in obj)
+	str += i + "\n";
+alert(str);
+///
 	
 	var ret = [];
 	$.each(obj, function(k, v) {
