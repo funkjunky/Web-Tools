@@ -25,6 +25,8 @@ $(function() {
 					return this.each(function() {
 						//set $this to be the data of the single element we are on
 						var $this = $(this).data("multiSelection");
+						if(typeof $this == "undefined")
+							return;
 						
 						//grab the options. Add data to it.
 						var newOptions = $this.options;
