@@ -103,7 +103,7 @@ $(function() {
 			}
 		};
 
-	if(methods[options]) {
+	if(typeof $(this).data("multiSelection") != "undefined" && methods[options]) {
 		return methods[options].apply(this, Array.prototype.slice.call(arguments, 1));
 	} else if(typeof options == "object") {
 
