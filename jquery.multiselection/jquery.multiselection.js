@@ -15,6 +15,7 @@ $(function() {
 				});
 			},
 			data: function(arr) {
+					  alert("I was called!!");
 				if(typeof arr == "undefined")
 				{
 					return this.data("multiSelection").data;
