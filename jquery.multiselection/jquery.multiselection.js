@@ -15,7 +15,7 @@ $(function() {
 				});
 			},
 			data: function(arr) {
-					  alert($(this).attr("id")+" - new data:\n"+arr);
+					  //alert($(this).attr("id")+" - new data:\n"+arr);
 				if(typeof arr == "undefined")
 				{
 					return this.data("multiSelection").data;
@@ -407,21 +407,15 @@ $(function() {
 					if(typeof selections !== "undefined")
 						items = array_unique($.merge(items, selections));
 	
-					//clear checkboxes (their may be a more effecient way)
-					for(var i in $this.cbs) { 
-						if($this.cbs[i].attr("checked") == true) {	  
-							$this.cbs[i].attr("checked", false);
-							$this.cbs[i].change();
-						}
-					}
-					//clean up whitespace and check the boxes and if any failure,
 					//then set an onsubmit on the form to warn the user.
 					var hasFailed = false;
 					//clear the input. Checking the boxes will fill it in again.
+					//also we will manually fill out already checked boxes.
 					$(this).val("");
-					for(var i=0; i != items.length; ++i)
+					for(var i in $this.cbs)
 					{
-						var item = items[i];
+						//TODO: reimplement error handling of items.
+						/*
 						if(item != "" && typeof $this.cbs[item] == "undefined") {
 							hasFailed = true;
 							var message = "item #" + i 
@@ -437,12 +431,30 @@ $(function() {
 								$(this).val($(this).val() + item);
 							}
 						}
-						else if(item != "")
-						{
+						*/
+						var item = i;
+						if(items.indexOf(i) !== -1) {
 							if($this.cbs[item].attr("checked") == false) {
 								$this.cbs[item].attr("checked", true);
 								$this.cbs[item].change();
 							}
+							//else add the text, because we need to still.
+							else {
+								if($.trim($(this).val()).length > 0)
+									$(this).val($(this).val() + ", ");
+								$(this).val($(this).val() + item);
+							}
+						}
+						//else if the cbs is checked, then uncheck it.
+						//(but add the text first, so their are no complaints
+						//from the onchange and removing an item)
+						else if($this.cbs[item].attr("checked") == true) {
+							if($.trim($(this).val()).length > 0)
+								$(this).val($(this).val() + ", ");
+							$(this).val($(this).val() + item);
+
+							$this.cbs[item].attr("checked", false);
+							$this.cbs[item].change();
 						}
 					}
 	
