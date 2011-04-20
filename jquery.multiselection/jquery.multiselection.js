@@ -421,6 +421,7 @@ $(function() {
 					$(this).val("");
 					for(var i=0; i != items.length; ++i)
 					{
+						var item = items[i];
 						if(item != "" && typeof $this.cbs[item] == "undefined") {
 							hasFailed = true;
 							var message = "item #" + i 
