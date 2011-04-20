@@ -6,6 +6,8 @@ $(function() {
 			select: function(mixed) {
 				return this.each(function() {
 					var $this = $(this).data("multiSelection");
+					if(typeof $this == "undefined")
+							  return;
 					//if the data is not an array, then turn it into one.
 					if(!$.isArray(mixed)) 	
 						mixed = [mixed];
@@ -61,6 +63,8 @@ $(function() {
 
 				this.each(function() {
 					var $this = $(this).data("multiSelection");
+					if(typeof $this == "undefined")
+							  return;
 
 					$this.cbButton.attr("disabled", true);
 					for(var i in $this.cbs)
@@ -72,6 +76,8 @@ $(function() {
 
 				this.each(function() {
 					var $this = $(this).data("multiSelection");
+					if(typeof $this == "undefined")
+							  return;
 	
 					$this.cbButton.attr("disabled", false);
 					for(var i in $this.cbs)
@@ -84,6 +90,8 @@ $(function() {
 
 				this.each(function() {
 					var $this = $(this).data("multiSelection");
+					if(typeof $this == "undefined")
+							  return;
 	
 					$this.cbContainer.remove();
 					$this.cbContainer = 0;
