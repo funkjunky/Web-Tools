@@ -126,7 +126,8 @@ $(function() {
 				autoCorrect: false,
 				hasFixInError: false,
 				onAdd: function(){},
-				onRemove: function(){}
+				onRemove: function(){},
+				onChange: function(){}
 			};
 			var l_options = $.extend(defaults, options_access);
 
@@ -296,43 +297,14 @@ $(function() {
 				checkbox.val(value);
 				checkbox.bind("change.multiSelection"
 				, function() {
-					if($(this).attr("checked")) {
-						var newInputStr = selection.val();
-						if($.trim(selection.val()).length > 0)
-							newInputStr += ", ";
-						newInputStr += $(this).val();
-		
-						selection.val(newInputStr);
-						$this.autocomplete.disable(this.value);
-						$this.options.onAdd.call(this);
-					}
-					else{
-						var inputValStr = selection.val();
-						//search for the first occurance of value, then slice the 
-						//string
-						var indexOfVal = inputValStr.indexOf(this.value);
-						//if(indexOfVal == -1)
-						//	return options["errorCallback"].call(window,
-						//		"The text input does not contain the options you 
-						//unchecked. This is just a warning");
-						//their are two cases. One is that it's the first string.
-						if(indexOfVal == 0)
-							//+2 is the comma and space.
-							inputValStr = inputValStr.substring(0, indexOfVal)
-								+ inputValStr.substring(indexOfVal 
-																+ this.value.length + 2);
-						//the second is any other space, including last.
-						else
-							//the -2 is the comma and space before the value.
-							inputValStr = inputValStr.substring(0, indexOfVal-2)
-								+ inputValStr.substring(indexOfVal + this.value.length)
-			
-						selection.val(inputValStr);
-			
-						$this.autocomplete.enable(this.value);
-
-						$this.options.onRemove.call(this);
-					}
+					ms_checkbox_change.call(this, selection);
+					//first get the list of realItems selected
+					var realItems = [];
+					for(var i in $this.cbs)
+						if($this.cbs[i].attr("checked") == true)
+							realItems.push(i);
+					//then call the event method with that list.
+					$this.options["onChange"].call(this, realItems);
 				});
 				var label = $("<label for='"+id+"'>"+text+"</label>");
 				var container = $("<div />");
@@ -412,6 +384,7 @@ $(function() {
 					//clear the input. Checking the boxes will fill it in again.
 					//also we will manually fill out already checked boxes.
 					$(this).val("");
+					var realItems = [];
 					for(var i in $this.cbs)
 					{
 						//TODO: reimplement error handling of items.
@@ -434,9 +407,10 @@ $(function() {
 						*/
 						var item = i;
 						if(items.indexOf(i) !== -1) {
+							realItems.push(item);
 							if($this.cbs[item].attr("checked") == false) {
 								$this.cbs[item].attr("checked", true);
-								$this.cbs[item].change();
+								ms_checkbox_change.call($this.cbs[item].get(0), $(this));
 							}
 							//else add the text, because we need to still.
 							else {
@@ -454,7 +428,7 @@ $(function() {
 							$(this).val($(this).val() + item);
 
 							$this.cbs[item].attr("checked", false);
-							$this.cbs[item].change();
+							ms_checkbox_change.call($this.cbs[item].get(0), $(this));
 						}
 					}
 	
@@ -465,6 +439,8 @@ $(function() {
 						return $this.options["canCancelSubmission"];
 					});
 				}
+
+				$this.options["onChange"].call(this, realItems);
 			};
 	
 			function _createButton() {
@@ -895,4 +871,46 @@ function array_unique(arr) {
 	});
 
 	return ret;
+}
+
+//this context needs to be the checkbox.
+function ms_checkbox_change(selection) {
+		var $this = selection.data("multiSelection");
+		 if($(this).attr("checked")) {
+			 var newInputStr = selection.val();
+			 if($.trim(selection.val()).length > 0)
+				 newInputStr += ", ";
+			 newInputStr += $(this).val();
+
+			 selection.val(newInputStr);
+			 $this.autocomplete.disable(this.value);
+			 $this.options.onAdd.call(this);
+		 }
+		 else{
+			 var inputValStr = selection.val();
+			 //search for the first occurance of value, then slice the 
+			 //string
+			 var indexOfVal = inputValStr.indexOf(this.value);
+			 //if(indexOfVal == -1)
+			 //	return options["errorCallback"].call(window,
+			 //		"The text input does not contain the options you 
+			 //unchecked. This is just a warning");
+			 //their are two cases. One is that it's the first string.
+			 if(indexOfVal == 0)
+				 //+2 is the comma and space.
+				 inputValStr = inputValStr.substring(0, indexOfVal)
+					 + inputValStr.substring(indexOfVal 
+													 + this.value.length + 2);
+			 //the second is any other space, including last.
+			 else
+				 //the -2 is the comma and space before the value.
+				 inputValStr = inputValStr.substring(0, indexOfVal-2)
+					 + inputValStr.substring(indexOfVal + this.value.length)
+ 
+			 selection.val(inputValStr);
+ 
+			 $this.autocomplete.enable(this.value);
+
+			 $this.options.onRemove.call(this);
+		 }
 }

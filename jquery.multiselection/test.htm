@@ -14,7 +14,8 @@
 			  errorCallback: UserWarning, 
 			  hasFixInError: true
 			  , onAdd: function() {alert("added: "+$(this).val());},
-			  onRemove: function() {alert("removed: "+$(this).val());}
+			  onRemove: function() {alert("removed: "+$(this).val());},
+			  onChange: function(items) {alert(items);}
 	});
 
 	$("#fruit2")
