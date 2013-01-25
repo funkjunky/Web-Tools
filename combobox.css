@@ -1,0 +1,16 @@
+.combobox_list
+{
+	border: solid 1px black;
+	background-color: white;
+	margin-top: 5px;
+}
+
+.combobox_option
+{
+	cursor: pointer;
+}
+
+.combobox_option:hover
+{
+	background-color: #98ADFD;
+}

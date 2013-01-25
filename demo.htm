@@ -1,9 +1,11 @@
 <html>
   <head>
     <title>This is to test out all of the tools built here.</title>
+	 <link rel="stylesheet" type="text/css" href="combobox.css">
     <script src="jquery.min.js"></script>
     <script src="jquery.multiselection.js"></script>
     <script src="jquery.timepicker.js"></script>
+	 <script src="jquery.combobox.js"></script>
     <script src="messageGraphicsSystem.js"></script>
     <script type="text/javascript">
       $(function() {
@@ -14,6 +16,26 @@
           errorCallback: UserWarning,
           hasFixInError: false
         });
+		  $(".combobox").combobox(
+		  	{	source:
+					[	{label: "one", value: "1"},
+						{label: "two", value: "2"},
+						{label: "three", value: "3"},
+						{label: "four", value: "4"},
+						{label: "five", value: "5"},
+						{label: "t", value: "ttt"}],
+				selected: "ttt"
+			});	
+		  $("#unique_cb").combobox(
+		  	{	source:
+					[	{label: "earliest", value: "a"},
+						{label: "earlier", value: "b"},
+						{label: "early", value: "c"},
+						{label: "middle", value: "d"},
+						{label: "late", value: "e"},
+						{label: "laterest", value: "f"}],
+				selected: "ttt"
+			});	
         $("#triggerwarning").click(function() { 
           Warning("You have triggered a warning via visual "
                     + "clicking device [button].");
@@ -25,5 +47,9 @@
     <label>Time Picker</label><input type="text" id="timepicker" autocomplete="off" /><br />
     <label>Multiselection</label><input type="text" id="multiselection" autocomplete="off" /><br />
     <button id="triggerwarning">Trigger Warning</button><br />
+	 <label>Combobox 1a</label><select class="combobox" data-selected="4"></select>
+	 <label>Combobox 1b</label><select class="combobox" data-selected="ttt"></select>
+	 <br />
+	 <label>Combobox 2</label><select id="unique_cb" data-selected="d"></select>
   </body>
 </html>
